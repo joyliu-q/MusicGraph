@@ -7,19 +7,29 @@
             height: 60%;
             border: 1px solid lightgray;
         }
+        #noteButtons {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <button id="A">A</button>
-    <button id="B">B</button>
-    <button id="C">C</button>
+    <div id="noteButtons">
+        <button onclick="selectNote('A')">A</button>
+        <button onclick="selectNote('B')">B</button>
+        <button onclick="selectNote('C')">C</button>
+    </div>
     <div id="musicNetwork"></div>
+    <button onclick="playPressed()">Play</button>
     <pre id="eventSpan"></pre>
     <script type="text/javascript">
         // Set-up
+        let current_note = "C";
+        let root_node;
+        let current_node;
+
         var locales = {
             music: {
-                edit: 'Edit Music Map',
+                edit: 'Edit',
                 del: 'Delete selected note',
                 back: 'Back',
                 addNode: 'Add Node',
@@ -35,14 +45,9 @@
             }
         }
 
-        // Node Functions Set-up 
-        function selectNote(note){
-            
-        }
-
         // create an array with nodes
         var nodes = new vis.DataSet([
-            {id: 1, label: 'A'},
+            {id: 1, label: 'A', instrument: 'ggez'},
             {id: 2, label: 'C#'},
             {id: 3, label: 'B'},
             {id: 4, label: 'E♭'},
@@ -57,6 +62,19 @@
             {from: 2, to: 5}
         ]);
 
+        // node functions set-up 
+        function selectNote(note) {
+            current_note = note;
+            var buttons = document.getElementById("noteButtons");
+            buttons.style.display = "none";
+        }
+        function playPressed() {
+            nodeList = nodes.get({fields: ['id', 'label']});
+            edgeList = edges.get({fields:["from", "to"]});
+            var randomRoot = nodeList[Math.floor(Math.random()*nodeList.length)];
+            console.log(randomRoot.label);
+        }
+
         // create a network
         var container = document.getElementById('musicNetwork');
 
@@ -65,15 +83,19 @@
             nodes: nodes,
             edges: edges
         };
-
         var options = {
             interaction: { hover: true },
             manipulation: {
                 enabled: true,
                 addNode: function(nodeData,callback) {
-                    nodeData.label = 'C';
-                    nodeData.instrument = 'dab';
-                    callback(nodeData);
+                    var buttons = document.getElementById("noteButtons");
+                    buttons.style.display = "block";
+                    current_note = prompt("Please enter note");
+                    if (current_note != "") {
+                        console.log(nodeData);
+                        nodeData.label = current_note;
+                        callback(nodeData);
+                    }
                 },
                 editNode: function(nodeData,callback) {
                     nodeData.label = 'A';
@@ -155,6 +177,11 @@
             console.log("select Event:", params);
         });
         network.on("selectNode", function (params) {
+            // THIS IS WHEN YOU SELECT A NODE
+            root_node_index = params["nodes"][0];
+            neightboring_nodes = network.getConnectedNodes(root_node_index);
+            // root_node_index is actually a string for some reason? Whack
+            console.log("Root node selected. Index: " + root_node_index + ". Neighbors: " + neightboring_nodes);
             console.log("selectNode Event:", params);
         });
         network.on("selectEdge", function (params) {
