@@ -8,38 +8,45 @@
             height: 60%;
             border: 1px solid lightgray;
         }
-        #noteButtons {
+        #instructionText {
             display: none;
         }
     </style>
 </head>
 <body>
-    <div id="noteButtons">
-        <button onclick="selectNote('A')">A</button>
-        <button onclick="selectNote('B')">B</button>
-        <button onclick="selectNote('C')">C</button>
-    </div>
     <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-        Launch demo modal
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#noteModal">
+        Add Node
     </button>
-    
+    <span id="instructionText">Instructions: Blah</span>
     <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="noteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <h5 class="modal-title" id="exampleModalLabel">Please select note details</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
             </div>
             <div class="modal-body">
-            ...
+                <span>Music Note:</span>
+                <div id="noteButtons" class="btn-group" role="group">
+                    <button onclick="selectNote('A')" class="btn btn-secondary">A</button>
+                    <button onclick="selectNote('B')" class="btn btn-secondary">B</button>
+                    <button onclick="selectNote('C')" class="btn btn-secondary">C</button>
+                </div>
+                <br/>
+                <span>Sharp/Flat:</span>
+                <div id="sharpOrFlat" class="btn-group" role="group">
+                    <button onclick="selectNote('sharp')" class="btn btn-secondary">sharp/#</button>
+                    <button onclick="selectNote('natural')" class="btn btn-secondary"> </button>
+                    <button onclick="selectNote('flat')" class="btn btn-secondary">flat/♭</button>
+                </div>
             </div>
             <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
+            <button onclick="addNodeSubmit()" type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
             </div>
         </div>
         </div>
@@ -50,7 +57,7 @@
     <pre id="eventSpan"></pre>
     <script type="text/javascript">
         // Set-up
-        let current_note = "C";
+        let current_note = ['C',''];
         let root_node;
         let current_node;
 
@@ -91,9 +98,33 @@
 
         // node functions set-up 
         function selectNote(note) {
-            current_note = note;
-            var buttons = document.getElementById("noteButtons");
-            buttons.style.display = "none";
+            switch (note) {
+                case 'sharp':
+                    current_note[1] = "#";
+                    console.log(current_note);
+                    break;
+                case 'flat':
+                    current_note[1] = "♭";
+                    console.log(current_note);
+                    break;
+                case 'natural':
+                    current_note[1] = "";
+                    console.log(current_note);
+                    break;
+                default:
+                    current_note[0] = note;
+                    console.log(current_note);
+                    break;
+            }
+        }
+        function addNodeSubmit() {
+            if (current_note[0] != '' && current_note[1] != '') {
+                nodeList = nodes.get({fields: ['id', 'label']});
+                nodes.add([
+                    {id: nodeList.length+1, label: current_note[0] + current_note[1]}
+                ]);
+                document.getElementById("instructionText").style.display = "block";
+            }
         }
         function playPressed() {
             nodeList = nodes.get({fields: ['id', 'label']});
@@ -101,7 +132,6 @@
             var randomRoot = nodeList[Math.floor(Math.random()*nodeList.length)];
             console.log(randomRoot.label);
         }
-
         // create a network
         var container = document.getElementById('musicNetwork');
 
@@ -115,8 +145,6 @@
             manipulation: {
                 enabled: true,
                 addNode: function(nodeData,callback) {
-                    var buttons = document.getElementById("noteButtons");
-                    buttons.style.display = "block";
                     current_note = prompt("Please enter note");
                     if (current_note != "") {
                         console.log(nodeData);
