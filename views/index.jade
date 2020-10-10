@@ -1,0 +1,76 @@
+extends layout
+
+block content
+	.container-fluid
+		span#instructionText Instructions: Blah
+		
+		// Note Editor Modal
+		#noteModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='exampleModalLabel' aria-hidden='true')
+			.modal-dialog(role='document')
+				.modal-content
+					.modal-header
+						h5#exampleModalLabel.modal-title Please select note details
+						button.close(type='button' data-dismiss='modal' aria-label='Close')
+							span(aria-hidden='true') ×
+					.modal-body
+						span Music Note:
+						#noteButtons.btn-group.btn-group-toggle(role='group')
+							button.btn.btn-secondary(onclick="selectNote('A')") A
+							button.btn.btn-secondary(onclick="selectNote('B')") B
+							button.btn.btn-secondary(onclick="selectNote('C')") C
+						br
+						span Sharp/Flat:
+						#sharpOrFlat.btn-group.btn-group-toggle(role='group')
+							button.btn.btn-secondary(onclick="selectNote('sharp')") sharp/#
+							button.btn.btn-secondary(onclick="selectNote('natural')")  
+							button.btn.btn-secondary(onclick="selectNote('flat')") flat/♭
+					.modal-footer
+						button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+						button.btn.btn-primary(onclick='addNodeSubmit()' type='button' data-dismiss='modal' data-toggle='collapse') Save changes
+		
+		.row.align-items-center
+			// Toolbox Section
+			#toolbox.col-2
+				h3 Toolbox
+				span Click a node and drag the edge to another node to connect them.
+				br
+				br
+				button.btn.btn-primary(type='button' data-toggle='modal' data-target='#noteModal')
+					i.fa.fa-plus
+					|                     Add Node
+				br
+				br
+				.btn-group.btn-group-toggle(data-toggle='buttons')
+					button.btn.btn-outline-primary(type='button' disabled='')
+						i.fa.fa-chevron-right
+						|                         Add Edge
+					label.btn.btn-secondary
+						input.btn.btn-secondary(type='radio' onchange='toggleAddEdge(true)' autocomplete='off' checked='')
+						| On
+					label.btn.btn-secondary
+						input.btn.btn-secondary(type='radio' onchange='toggleAddEdge(false)' autocomplete='off')
+						| Off
+				br
+				br
+				button.btn.btn-warning(type='button' data-toggle='tooltip' data-placement='top' title='Edit Node')
+					i.fa.fa-pencil
+					|                     Node
+				button.btn.btn-warning(type='button' data-toggle='tooltip' data-placement='top' title='Edit Edge' disabled='')
+					i.fa.fa-arrows
+					|                     Edge
+				br
+				br
+				button.btn.btn-danger(type='button' disabled='')
+					i.fa.fa-trash
+					|                     Delete Node
+				br
+				br
+				button.btn.btn-primary(type='button' onclick='playPressed()')
+					i.fa.fa-play
+					|                     Play Music Mode
+			// Network Display Section
+			#musicNetwork.col-10
+		.row
+			pre#eventSpan.
+
+
