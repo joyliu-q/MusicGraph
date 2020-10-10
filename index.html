@@ -2,25 +2,32 @@
 <head>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
     <style type="text/css">
         #musicNetwork {
-            width: 100%;
-            height: 60%;
+            width: auto;
+            height: 500px;
             border: 1px solid lightgray;
         }
         #instructionText {
             display: none;
         }
+        .btn-secondary:focus {
+            background-color: gray;
+        }
     </style>
 </head>
 <body>
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#noteModal">
-        Add Node
-    </button>
-    <span id="instructionText">Instructions: Blah</span>
-    <!-- Modal -->
-    <div class="modal fade" id="noteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="container-fluid">
+        <span id="instructionText">Instructions: Blah</span>
+        <!-- Note Editor Modal -->
+        <div class="modal fade"
+        id="noteModal" 
+        tabindex="-1" 
+        role="dialog" 
+        aria-labelledby="exampleModalLabel" 
+        aria-hidden="true"
+        >
         <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -31,14 +38,14 @@
             </div>
             <div class="modal-body">
                 <span>Music Note:</span>
-                <div id="noteButtons" class="btn-group" role="group">
+                <div id="noteButtons" class="btn-group btn-group-toggle" role="group">
                     <button onclick="selectNote('A')" class="btn btn-secondary">A</button>
                     <button onclick="selectNote('B')" class="btn btn-secondary">B</button>
                     <button onclick="selectNote('C')" class="btn btn-secondary">C</button>
                 </div>
                 <br/>
                 <span>Sharp/Flat:</span>
-                <div id="sharpOrFlat" class="btn-group" role="group">
+                <div id="sharpOrFlat" class="btn-group btn-group-toggle" role="group">
                     <button onclick="selectNote('sharp')" class="btn btn-secondary">sharp/#</button>
                     <button onclick="selectNote('natural')" class="btn btn-secondary"> </button>
                     <button onclick="selectNote('flat')" class="btn btn-secondary">flat/♭</button>
@@ -46,21 +53,69 @@
             </div>
             <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button onclick="addNodeSubmit()" type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+            <button onclick="addNodeSubmit()" type="button" class="btn btn-primary" data-dismiss="modal" data-toggle="collapse">Save changes</button>
             </div>
         </div>
         </div>
+        </div>
+        <div class="row align-items-center">
+             <!-- Toolbox Section -->
+            <div class="col-3" id="toolbox">
+                <h3>Toolbox</h3>
+                <span>Click a node and drag the edge to another node to connect them.</span>
+                <br/><br/>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-toggle="collapse" data-target="#noteModal">
+                    <i class="fa fa-plus"></i>
+                    Add Node
+                </button>
+                <br/><br/>
+                <button type="button" class="btn btn-outline-primary" disabled>
+                    <i class="fa fa-chevron-right"></i>
+                    Add Edge
+                </button>
+                <div class="btn-group btn-group-toggle" role="group">
+                    <button onclick="toggleAddEdge(true)" class="btn btn-secondary" checked>On</button>
+                    <button onclick="toggleAddEdge(false)" class="btn btn-secondary">Off</button>
+                </div>
+                <br/><br/>
+                <button type="button" class="btn btn-warning" disabled>
+                    <i class="fa fa-pencil"></i>
+                    Edit Node
+                </button>
+                <button type="button" class="btn btn-warning" disabled>
+                    <i class="fa fa-arrows"></i>
+                    Edit Edge
+                </button>
+                <br/><br/>
+                <button type="button" class="btn btn-danger" disabled>
+                    <i class="fa fa-arrows"></i>
+                    Delete Node
+                </button>
+                <button type="button" class="btn btn-danger" disabled>
+                    <i class="fa fa-arrows"></i>
+                    Delete Node
+                </button>
+                <br/><br/>
+                <button type="button" class="btn btn-primary" onclick="playPressed()">
+                    <i class="fa fa-play"></i>
+                    Play Music Mode
+                </button>
+            </div>
+            <!-- Network Display Section -->
+            <div class="col-9" id="musicNetwork"></div>
+        </div>
+        <div class="row">
+            <pre id="eventSpan"></pre>
+        </div>
     </div>
-    
-    <div id="musicNetwork"></div>
-    <button onclick="playPressed()">Play</button>
-    <pre id="eventSpan"></pre>
+
     <script type="text/javascript">
         // Set-up
         let current_note = ['C',''];
         let root_node;
         let current_node;
-
+        let edgeMode = false;
+        
         var locales = {
             music: {
                 edit: 'Edit',
@@ -118,12 +173,24 @@
             }
         }
         function addNodeSubmit() {
-            if (current_note[0] != '' && current_note[1] != '') {
+            network.enableEditMode();
+            if (current_note[0] != '') {
                 nodeList = nodes.get({fields: ['id', 'label']});
                 nodes.add([
                     {id: nodeList.length+1, label: current_note[0] + current_note[1]}
                 ]);
                 document.getElementById("instructionText").style.display = "block";
+            }
+        }
+        function toggleAddEdge(bool) {
+            if (bool) {
+                edgeMode = true;
+                network.enableEditMode();
+                network.addEdgeMode();
+            }
+            else {
+                edgeMode = false;
+                network.disableEditMode();
             }
         }
         function playPressed() {
@@ -142,8 +209,36 @@
         };
         var options = {
             interaction: { hover: true },
+            interaction: {
+                navigationButtons: true,
+                keyboard: true
+            },
             manipulation: {
                 enabled: true,
+                addNode: function(nodeData,callback) {
+                    current_note = prompt("Please enter note");
+                    if (current_note != "") {
+                        console.log(nodeData);
+                        nodeData.label = current_note;
+                        callback(nodeData);
+                    }
+                },
+                addEdge: function(edgeData,callback) {
+                    edgeList = edges.get({fields: ['from', 'to']});
+                    if ({from: edgeData.from, to: edgeData.to})
+                    if (edgeData.from === edgeData.to) {
+                        var r = confirm("Do you want to connect the node to itself?");
+                        if (r === true) {
+                        callback(edgeData);
+                        }
+                    }
+                    else {
+                        callback(edgeData);
+                    }
+                    if (edgeMode) {
+                        network.addEdgeMode();
+                    }
+                },
                 addNode: function(nodeData,callback) {
                     current_note = prompt("Please enter note");
                     if (current_note != "") {
