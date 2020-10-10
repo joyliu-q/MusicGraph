@@ -60,7 +60,7 @@
         </div>
         <div class="row align-items-center">
              <!-- Toolbox Section -->
-            <div class="col-3" id="toolbox">
+            <div class="col-2" id="toolbox">
                 <h3>Toolbox</h3>
                 <span>Click a node and drag the edge to another node to connect them.</span>
                 <br/><br/>
@@ -78,21 +78,17 @@
                     <button onclick="toggleAddEdge(false)" class="btn btn-secondary">Off</button>
                 </div>
                 <br/><br/>
-                <button type="button" class="btn btn-warning" disabled>
+                <button type="button" data-toggle="tooltip" data-placement="top" title="Edit Node" class="btn btn-warning">
                     <i class="fa fa-pencil"></i>
-                    Edit Node
+                    Node
                 </button>
-                <button type="button" class="btn btn-warning" disabled>
+                <button type="button" data-toggle="tooltip" data-placement="top" title="Edit Edge" class="btn btn-warning" disabled>
                     <i class="fa fa-arrows"></i>
-                    Edit Edge
+                    Edge
                 </button>
                 <br/><br/>
                 <button type="button" class="btn btn-danger" disabled>
-                    <i class="fa fa-arrows"></i>
-                    Delete Node
-                </button>
-                <button type="button" class="btn btn-danger" disabled>
-                    <i class="fa fa-arrows"></i>
+                    <i class="fa fa-trash"></i>
                     Delete Node
                 </button>
                 <br/><br/>
@@ -102,7 +98,7 @@
                 </button>
             </div>
             <!-- Network Display Section -->
-            <div class="col-9" id="musicNetwork"></div>
+            <div class="col-10" id="musicNetwork"></div>
         </div>
         <div class="row">
             <pre id="eventSpan"></pre>
@@ -199,6 +195,7 @@
             var randomRoot = nodeList[Math.floor(Math.random()*nodeList.length)];
             console.log(randomRoot.label);
         }
+
         // create a network
         var container = document.getElementById('musicNetwork');
 
@@ -329,7 +326,11 @@
         network.on("selectNode", function (params) {
             // THIS IS WHEN YOU SELECT A NODE
             root_node_index = params["nodes"][0];
-            neightboring_nodes = network.getConnectedNodes(root_node_index);
+            neighboring_nodes = network.getConnectedNodes(root_node_index);
+            //PLAY it her
+
+            // code for go to a random neighboring node, aka change root_node to neighbor 
+
             // root_node_index is actually a string for some reason? Whack
             console.log("Root node selected. Index: " + root_node_index + ". Neighbors: " + neightboring_nodes);
             console.log("selectNode Event:", params);
