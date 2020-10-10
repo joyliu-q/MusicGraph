@@ -4,8 +4,8 @@ block content
 	.container-fluid
 		span#instructionText Instructions: Blah
 		
-		// Note Editor Modal
-		#noteModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='exampleModalLabel' aria-hidden='true')
+		//Note Editor Modal
+		#noteModal.modal.fade(tabindex='-1' role='dialog' aria-hidden='true')
 			.modal-dialog(role='document')
 				.modal-content
 					.modal-header
@@ -28,6 +28,33 @@ block content
 						button.btn.btn-secondary(type='button' data-dismiss='modal') Close
 						button.btn.btn-primary(onclick='addNodeSubmit()' type='button' data-dismiss='modal' data-toggle='collapse') Save changes
 		
+		//Edge Editor Modal
+		#edgeModal.modal.fade(tabindex='-1' role='dialog' aria-hidden='true')
+			.modal-dialog(role='document')
+				.modal-content
+					.modal-header
+						h5#exampleModalLabel.modal-title Please select edge details
+						button.close(type='button' data-dismiss='modal' aria-label='Close')
+							span(aria-hidden='true') ×
+					.modal-body
+						span From:
+						button.btn.btn-secondary.dropdown-toggle(type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false') Select
+						.dropdown-menu
+							// NOTE: when using jade, use for loop here to iterate through all possible nodes
+							a.dropdown-item(href='#') 0
+							a.dropdown-item(href='#') 1
+							a.dropdown-item(href='#') 2
+						span To:
+						button.btn.btn-secondary.dropdown-toggle(type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false') Select
+						.dropdown-menu
+							// NOTE: when using jade, use for loop here to iterate through all possible nodes
+							a.dropdown-item(href='#') 0
+							a.dropdown-item(href='#') 1
+							a.dropdown-item(href='#') 2
+					.modal-footer
+						button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+						button.btn.btn-primary(onclick='addEdgeSubmit(0,2)' type='button' data-dismiss='modal' data-toggle='collapse') Save changes
+		
 		.row.align-items-center
 			// Toolbox Section
 			#toolbox.col-2
@@ -35,42 +62,49 @@ block content
 				span Click a node and drag the edge to another node to connect them.
 				br
 				br
-				button.btn.btn-primary(type='button' data-toggle='modal' data-target='#noteModal')
-					i.fa.fa-plus
-					|  Add Node
+				#toolbox_main.btn-group.btn-group-toggle(role='group')
+					button.btn.btn-primary(type='button' data-toggle='collapse' data-target='#addToolGroup')
+						i.fa.fa-plus
+						|  Add
+					button.btn.btn-warning(type='button' title='Edit Node' data-toggle='collapse' data-target='#editToolGroup')
+						i.fa.fa-pencil
+						|  Edit
+					button.btn.btn-danger.deleteNodeButton(type='button' data-toggle='collapse' data-target='#deleteToolGroup' onclick='network.deleteSelected()')
+						i.fa.fa-trash
+						|  Delete
 				br
 				br
-				.btn-group.btn-group-toggle(data-toggle='buttons')
-					button.btn.btn-outline-primary(type='button' disabled='')
-						i.fa.fa-chevron-right
-						| Add Edge
-					label.btn.btn-secondary
-						input.btn.btn-secondary(type='radio' onchange='toggleAddEdge(true)' autocomplete='off' checked='')
-						| On
-					label.btn.btn-secondary
-						input.btn.btn-secondary(type='radio' onchange='toggleAddEdge(false)' autocomplete='off')
-						| Off
-				br
-				br
-				button.btn.btn-warning(type='button' data-toggle='tooltip' data-placement='top' title='Edit Node')
-					i.fa.fa-pencil
-					|  Node
-				button.btn.btn-warning(type='button' data-toggle='tooltip' data-placement='top' title='Edit Edge' disabled='')
-					i.fa.fa-arrows
-					|  Edge
-				br
-				br
-				button.btn.btn-danger(type='button' disabled='')
-					i.fa.fa-trash
-					|  Delete Node
+				#toolMoreInfo
+					// Add Tool Collapse
+					#addToolGroup.collapse(data-parent='#toolMoreInfo')
+						button.btn.btn-primary.col-5(type='button' data-toggle='modal' data-target='#noteModal') Add Node
+						button.btn.btn-primary.col-5(type='button' data-toggle='modal' data-target='#edgeModal') Add Edge
+						br
+						br
+						.btn-group.btn-group-toggle(data-toggle='buttons')
+							button.btn.btn-outline-primary(type='button' disabled='')
+								i.fa.fa-chevron-right
+								|  Drag to Draw
+							label.btn.btn-secondary
+								input.btn.btn-secondary(type='radio' onchange='toggleAddEdge(true)' autocomplete='off')
+								| On
+							label.btn.btn-secondary
+								input.btn.btn-secondary(type='radio' onchange='toggleAddEdge(false)' autocomplete='off')
+								| Off
+					// Edit Tool Collapse
+					#editToolGroup.collapse(data-parent='#toolMoreInfo')
+						label Click to select a node or edge to edit.
+					// Delete Tool Collapse
+					#deleteToolGroup.collapse(data-parent='#toolMoreInfo')
+						label Click to select a node or edge, then click the delete button above.
 				br
 				br
 				button.btn.btn-primary(type='button' onclick='playPressed()')
 					i.fa.fa-play
 					|  Play Music Mode
-			// Network Display Section
+			//Network Display Section
 			#musicNetwork.col-10
+		
 		.row
 			pre#eventSpan.
-
 
