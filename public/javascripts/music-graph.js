@@ -248,13 +248,13 @@ network.on("select", function (params) {
 network.on("selectNode", function (params) {
     // THIS IS WHEN YOU SELECT A NODE
     root_node_index = params["nodes"][0];
-    neighboring_nodes = network.getConnectedNodes(root_node_index);
+    let neighboring_nodes = network.getConnectedNodes(root_node_index);
     //PLAY it her
 
     // code for go to a random neighboring node, aka change root_node to neighbor 
 
     // root_node_index is actually a string for some reason? Whack
-    console.log("Root node selected. Index: " + root_node_index + ". Neighbors: " + neightboring_nodes);
+    console.log("Root node selected. Index: " + root_node_index + ". Neighbors: " + neighboring_nodes);
     console.log("selectNode Event:", params);
 });
 network.on("selectEdge", function (params) {
