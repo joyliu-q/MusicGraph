@@ -22,6 +22,8 @@ var locales = {
     }
 }
 
+var default_instrument = new Instrument("sine", 0.1, 1, 0.5, 1, 1, null, null, null);
+
 // create an array with nodes
 var nodes = new vis.DataSet([
     {id: 1, label: 'A4', interval: 1000, timer: setTimeout(() => {}, 0), instrument: default_instrument},
@@ -100,7 +102,7 @@ function renderNodesDropdown() {
     }
 }
 
-function playNode(node) {
+function triggerNode(node) {
     clearTimeout(node.timer);
     node.instrument.press_note(node.label, node.id);
     node.timer = setTimeout(() => { node.instrument.release_note(node.label, node.id) }, node.interval);
@@ -114,12 +116,14 @@ function playPressed() {
     var randomRoot = nodeList[Math.floor(Math.random()*nodeList.length)];
     current_node = randomRoot.id;
     console.log(randomRoot);
-    for (i = 0; i < 5; i++) { 
-        current_node = getNextNode(current_node);
-        console.log(current_node);
-        console.log(nodeList[current_node - 1]);
-        playNode(nodeList[current_node - 1]);
-    };
+    playNextNode(current_node, nodeList);
+}
+function playNextNode(nodeId, nodeList) {
+    current_node = getNextNode(current_node);
+    console.log(current_node);
+    console.log(nodeList[current_node - 1]);
+    triggerNode(nodeList[current_node - 1]);
+    setTimeout(() => { playNextNode(current_node, nodeList); }, 1000); 
 }
 function getNextNode(node_id) {
     let neighboring_nodes = network.getConnectedNodes(node_id);
