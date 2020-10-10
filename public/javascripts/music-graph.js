@@ -24,19 +24,19 @@ var locales = {
 
 // create an array with nodes
 var nodes = new vis.DataSet([
-    {id: 1, label: 'A', instrument: 'ggez'},
-    {id: 2, label: 'C#'},
-    {id: 3, label: 'B'},
-    {id: 4, label: 'E♭'},
-    {id: 5, label: 'G'}
+    {id: 1, label: 'A4', interval: 1000, timer: setTimeout(() => {}, 0), instrument: default_instrument},
+    {id: 2, label: 'C#4', interval: 1000, timer: setTimeout(() => {}, 0), instrument: default_instrument},
+    {id: 3, label: 'B4', interval: 1000, timer: setTimeout(() => {}, 0), instrument: default_instrument},
+    {id: 4, label: 'Eb4', interval: 1000, timer: setTimeout(() => {}, 0), instrument: default_instrument},
+    {id: 5, label: 'G4', interval: 1000, timer: setTimeout(() => {}, 0), instrument: default_instrument}
 ]);
 
 // create an array with edges
 var edges = new vis.DataSet([
-    {from: 1, to: 3},
-    {from: 1, to: 2},
-    {from: 2, to: 4},
-    {from: 2, to: 5}
+    {from: 1, to: 3, interval: 1000},
+    {from: 1, to: 2, interval: 1000},
+    {from: 2, to: 4, interval: 1000},
+    {from: 2, to: 5, interval: 1000}
 ]);
 
 // node functions set-up 
@@ -47,7 +47,7 @@ function selectNote(note) {
             console.log(current_note);
             break;
         case 'flat':
-            current_note[1] = "♭";
+            current_note[1] = "b";
             console.log(current_note);
             break;
         case 'natural':
@@ -100,17 +100,25 @@ function renderNodesDropdown() {
     }
 }
 
+function playNode(node) {
+    clearTimeout(node.timer);
+    node.instrument.press_note(node.label, node.id);
+    node.timer = setTimeout(() => { node.instrument.release_note(node.label, node.id) }, node.interval);
+}
+
 // Traversing to play music
 function playPressed() {
     network.disableEditMode();
-    nodeList = nodes.get({fields: ['id', 'label']});
+    nodeList = nodes.get({fields: ['id', 'label', 'timer', 'instrument']});
     edgeList = edges.get({fields:["from", "to"]});
     var randomRoot = nodeList[Math.floor(Math.random()*nodeList.length)];
     current_node = randomRoot.id;
     console.log(randomRoot);
     for (i = 0; i < 5; i++) { 
         current_node = getNextNode(current_node);
-        console.log(nodeList[current_node]);
+        console.log(current_node);
+        console.log(nodeList[current_node - 1]);
+        playNode(nodeList[current_node - 1]);
     };
 }
 function getNextNode(node_id) {
