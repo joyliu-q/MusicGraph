@@ -1,0 +1,183 @@
+<html>
+<head>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style type="text/css">
+        #musicNetwork {
+            width: 100%;
+            height: 60%;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+    <button id="A">A</button>
+    <button id="B">B</button>
+    <button id="C">C</button>
+    <div id="musicNetwork"></div>
+    <pre id="eventSpan"></pre>
+    <script type="text/javascript">
+        // Set-up
+        var locales = {
+            music: {
+                edit: 'Edit Music Map',
+                del: 'Delete selected note',
+                back: 'Back',
+                addNode: 'Add Node',
+                addEdge: 'Add Edge',
+                editNode: 'Edit Node',
+                editEdge: 'Edit Edge',
+                addDescription: 'Click in an empty space to place a new node.',
+                edgeDescription: 'Click on a node and drag the edge to another node to connect them.',
+                editEdgeDescription: 'Click on the control points and drag them to a node to connect to it.',
+                createEdgeError: 'Cannot link edges to a cluster.',
+                deleteClusterError: 'Clusters cannot be deleted.',
+                editClusterError: 'Clusters cannot be edited.'
+            }
+        }
+
+        // Node Functions Set-up 
+        function selectNote(note){
+            
+        }
+
+        // create an array with nodes
+        var nodes = new vis.DataSet([
+            {id: 1, label: 'A'},
+            {id: 2, label: 'C#'},
+            {id: 3, label: 'B'},
+            {id: 4, label: 'E♭'},
+            {id: 5, label: 'G'}
+        ]);
+
+        // create an array with edges
+        var edges = new vis.DataSet([
+            {from: 1, to: 3},
+            {from: 1, to: 2},
+            {from: 2, to: 4},
+            {from: 2, to: 5}
+        ]);
+
+        // create a network
+        var container = document.getElementById('musicNetwork');
+
+        // provide the data in the vis format
+        var data = {
+            nodes: nodes,
+            edges: edges
+        };
+
+        var options = {
+            interaction: { hover: true },
+            manipulation: {
+                enabled: true,
+                addNode: function(nodeData,callback) {
+                    nodeData.label = 'C';
+                    nodeData.instrument = 'dab';
+                    callback(nodeData);
+                },
+                editNode: function(nodeData,callback) {
+                    nodeData.label = 'A';
+                    callback(nodeData);
+                },
+                controlNodeStyle: {
+                    //Styling here dab
+                }
+            },
+            locales: locales,
+            locale: "music",
+        };
+
+        // initialize your network!
+        var network = new vis.Network(container, data, options);
+        network.on("click", function (params) {
+            params.event = "[original event]";
+            document.getElementById("eventSpan").innerHTML =
+                "<h2>Click event:</h2>" + JSON.stringify(params, null, 4);
+            console.log(
+                "click event, getNodeAt returns: " + this.getNodeAt(params.pointer.DOM)
+            );
+        });
+        network.on("doubleClick", function (params) {
+            params.event = "[original event]";
+            document.getElementById("eventSpan").innerHTML =
+                "<h2>doubleClick event:</h2>" + JSON.stringify(params, null, 4);
+        });
+        network.on("oncontext", function (params) {
+            params.event = "[original event]";
+            document.getElementById("eventSpan").innerHTML = 
+                "<h2>oncontext (right click) event:</h2>" + JSON.stringify(params, null, 4);
+        });
+        network.on("dragStart", function (params) {
+            // There's no point in displaying this event on screen, it gets immediately overwritten
+            params.event = "[original event]";
+            console.log("dragStart Event:", params);
+            console.log(
+                "dragStart event, getNodeAt returns: " + this.getNodeAt(params.pointer.DOM)
+            );
+        });
+        network.on("dragging", function (params) {
+            params.event = "[original event]";
+            document.getElementById("eventSpan").innerHTML =
+                "<h2>dragging event:</h2>" + JSON.stringify(params, null, 4);
+        });
+        network.on("dragEnd", function (params) {
+            params.event = "[original event]";
+            document.getElementById("eventSpan").innerHTML =
+                "<h2>dragEnd event:</h2>" + JSON.stringify(params, null, 4);
+            console.log("dragEnd Event:", params);
+            console.log(
+                "dragEnd event, getNodeAt returns: " + this.getNodeAt(params.pointer.DOM)
+        );
+        });
+        network.on("controlNodeDragging", function (params) {
+            params.event = "[original event]";
+            document.getElementById("eventSpan").innerHTML =
+                "<h2>control node dragging event:</h2>" + JSON.stringify(params, null, 4);
+        });
+        network.on("controlNodeDragEnd", function (params) {
+            params.event = "[original event]";
+            document.getElementById("eventSpan").innerHTML =
+                "<h2>control node drag end event:</h2>" + JSON.stringify(params, null, 4);
+            console.log("controlNodeDragEnd Event:", params);
+        });
+        network.on("zoom", function (params) {
+            document.getElementById("eventSpan").innerHTML =
+                "<h2>zoom event:</h2>" + JSON.stringify(params, null, 4);
+        });
+        network.on("showPopup", function (params) {
+            document.getElementById("eventSpan").innerHTML =
+                "<h2>showPopup event: </h2>" + JSON.stringify(params, null, 4);
+        });
+        network.on("hidePopup", function () {
+            console.log("hidePopup Event");
+        });
+        network.on("select", function (params) {
+            console.log("select Event:", params);
+        });
+        network.on("selectNode", function (params) {
+            console.log("selectNode Event:", params);
+        });
+        network.on("selectEdge", function (params) {
+            console.log("selectEdge Event:", params);
+        });
+        network.on("deselectNode", function (params) {
+            console.log("deselectNode Event:", params);
+        });
+        network.on("deselectEdge", function (params) {
+            console.log("deselectEdge Event:", params);
+        });
+        network.on("hoverNode", function (params) {
+            console.log("hoverNode Event:", params);
+        });
+        network.on("hoverEdge", function (params) {
+            console.log("hoverEdge Event:", params);
+        });
+        network.on("blurNode", function (params) {
+            console.log("blurNode Event:", params);
+        });
+        network.on("blurEdge", function (params) {
+            console.log("blurEdge Event:", params);
+        });
+    </script>
+</body>
+</html>
