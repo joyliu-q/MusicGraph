@@ -3,18 +3,32 @@ function Instrument(name, wave_name, attack, decay, sustain, release, gain, filt
     let synth = new Tone.PolySynth();
     synth.set({oscillator: {type: wave_name}, envelope: {attack: attack, decay: decay, decayCurve: "linear", sustain: sustain, release: release, releaseCurve: "linear"}})
     this.synth = synth;
+    this.cutoff = 1500;
+    this.filter_type = "lowpass";
+    this.decay = 1;
+    this.reverb_wet = 1;
+    this.time = [1, 8];
+    this.feedback = 0.5;
+    this.delay_wet = 1;
     if (filter != null) {
         this.filter = new Tone.Filter({frequency: filter.cutoff, type: filter.type});
+        this.cutoff = filter.cutoff;
+        this.filter_type = filter.type;
     } else {
         this.filter = null;
     }
     if (reverb != null) {
         this.reverb = new Tone.Reverb({decay: reverb.decay, wet: reverb.wet});
+        this.decay = reverb.decay;
+        this.reverb_wet = reverb.wet;
     } else {
         this.reverb = null;
     }
     if (delay != null) {
-        this.delay = new Tone.FeedbackDelay({delayTime: delay.time, feedback: delay.feedback, wet: delay.wet});
+        this.delay = new Tone.FeedbackDelay({delayTime: delay.time[0] / delay.time[1] * secPerBeat * 1000, feedback: delay.feedback, wet: delay.wet});
+        this.time = delay.time;
+        this.feedback = delay.feedback;
+        this.delay_wet = delay.wet;
     } else {
         this.delay = null;
     }
@@ -29,6 +43,7 @@ function Instrument(name, wave_name, attack, decay, sustain, release, gain, filt
             effects_list.push(this.reverb);
         }
         if (delay != null) {
+            this.delay.set({delayTime: this.time[0] / this.time[1] * secPerBeat * 1000})
             effects_list.push(this.delay);
         }
         if (effects_list.length > 0) {
@@ -65,21 +80,31 @@ function Instrument(name, wave_name, attack, decay, sustain, release, gain, filt
     };
     this.set_filter_cutoff = function(cutoff) {
         this.filter.set({cutoff: cutoff});
+        this.cutoff = cutoff;
     };
     this.set_filter_type = function(type) {
         this.filter.set({type: type});
+        this.filter_type = type;
     };
     this.set_reverb_decay = function(decay) {
         this.reverb.set({decay: decay});
+        this.decay = decay;
     };
     this.set_reverb_mix = function(mix) {
         this.reverb.set({wet: mix});
+        this.reverb_wet = mix;
     };
     this.set_delay_time = function(time) {
-        this.delay.set({time: time});
+        this.delay.set({time: time[0] / time[1] * secPerBeat * 1000});
+        this.time = time;
     };
     this.set_delay_feedback = function(feedback) {
         this.delay.set({feedback: feedback});
+        this.feedback = feedback;
+    };
+    this.set_delay_mix = function(mix) {
+        this.delay.set({wet: mix});
+        this.delay_wet = mix;
     };
     
     this.get_name = function() {
@@ -107,11 +132,36 @@ function Instrument(name, wave_name, attack, decay, sustain, release, gain, filt
         return this.reverb.get().wet;
     };
     this.get_delay_time = function() {
-        return this.delay.get().time;
+        return this.time;
     };
     this.get_delay_feedback = function() {
         return this.delay.get().feedback;
     };
+
+    this.toggle_filter = function() {
+        if (this.filter != null) {
+            this.filter = null;
+        } else {
+            this.filter = new Tone.Filter({frequency: this.cutoff, type: this.filter_type});
+        }
+        this.rebuild();
+    }
+    this.toggle_reverb = function() {
+        if (this.reverb != null) {
+            this.reverb = null;
+        } else {
+            this.reverb = new Tone.Reverb({decay: this.decay, wet: this.reverb_wet});
+        }
+        this.rebuild();
+    }
+    this.toggle_filter = function() {
+        if (this.filter != null) {
+            this.filter = null;
+        } else {
+            this.delay = new Tone.FeedbackDelay({delayTime: this.time, feedback: this.feedback, wet: this.delay_wet});
+        }
+        this.rebuild();
+    }
 
     this.press_note = function(key, id) {
         if (this.key_map.has(key)) {
@@ -129,9 +179,10 @@ function Instrument(name, wave_name, attack, decay, sustain, release, gain, filt
     }
 }
 
-function Filter(cutoff, type) {
+function Filter(cutoff, type, wet) {
     this.cutoff = cutoff;
     this.type = type;
+    this.wet = wet;
 }
 
 function Reverb(decay, wet) {

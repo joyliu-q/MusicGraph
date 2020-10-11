@@ -1,17 +1,18 @@
 extends layout
 
 block content
-	.container-fluid
+	container-fluid
 		#title.align-items-center
 			h1 Music Graph
 			p Instructions: add notes and connections to a music network, then press play. 
+		
 		//Note Edit Modal
 		#noteModal.modal.fade(tabindex='-1' role='dialog' aria-hidden='true')
 			.modal-dialog(role='document')
 				.modal-content
 					.modal-header
 						h5#exampleModalLabel.modal-title Please select note details
-						button.close(type='button' data-dismiss='modal' aria-label='Close')
+						button.close(type='buttson' data-dismiss='modal' aria-label='Close')
 							span(aria-hidden='true') ×
 					.modal-body
 						span Music Note:
@@ -49,9 +50,9 @@ block content
 						span Instruments:
 						br
 						#instrumentButtons.btn-group.btn-group-toggle(role='group')
-							button.btn.btn-outline-primary.active(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Default
-							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Gamer
-							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Chill
+							button.btn.btn-outline-primary.active(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Instrument 1
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Instrument 2
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Instrument 3
 						br
 						br
 						#modeButtons.btn-group.btn-group-toggle(role='group')
@@ -59,33 +60,60 @@ block content
 							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Complete
 							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") None
 						br
+						br
+						#rootButtons.btn-group.btn-group-toggle(role='group')
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Root
+							button.btn.btn-outline-primary.active(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Not Root
+						br
 
 					.modal-footer
 						button.btn.btn-secondary(type='button' data-dismiss='modal') Close
 						button.btn.btn-primary(onclick='saveNodeSubmit()' type='button' data-dismiss='modal' data-toggle='collapse') Save changes
 		
+		//Edge Modal Editor
+		#edgeModal.modal.fade(tabindex='-1' role='dialog' aria-hidden='true')
+			.modal-dialog(role='document')
+				.modal-content
+					.modal-header
+						h5#exampleModalLabel.modal-title Please select edge details
+						button.close(type='button' data-dismiss='modal' aria-label='Close')
+							span(aria-hidden='true') ×
+					//TODO: Fix the bootstrap here
+					.modal-body
+						.form-group
+							label() From
+							input#startInterval.form-control(type='number' aria-describedby='emailHelp' placeholder='Start Interval')
+						.form-group
+							label() To
+							input#stopInterval.form-control(type='number' placeholder='Stop Interval')
+						br
+					.modal-footer
+						button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+						button.btn.btn-primary(onclick='saveEdgeSubmit()' type='button' data-dismiss='modal' data-toggle='collapse') Save changes
+
+
+		// Toolbox Section
 		.row.align-items-center
-			// Toolbox Section
 			#toolbox.col-3
 				.toolboxText
 					h3 Toolbox
 					span Click a node and drag the edge to another node to connect them.
 				br
 				.toolbox_main.btn-group.btn-group-toggle(role='group')
-					.button.btn.btn-primary.col-4(type='button' data-toggle='collapse' data-target='#addToolGroup')
+					.button.btn.btn-primary.col-4(id='add-button' type='button' data-toggle='collapse' data-target='#addToolGroup')
 						i.fa.fa-plus
 						|  Add
-					.button.btn.btn-warning.col-4(id='edit-button' type='button' title='Edit Node' onclick='editOpenModal()')
+					.button.btn.disabled.btn-warning.col-4(id='edit-button' type='button' title='Edit Node' onclick='openEditModal()')
 						i.fa.fa-pencil
 						|  Edit
-					.button.btn.btn-danger.col-4.deleteNodeButton(type='button' onclick='network.deleteSelected()')
+					.button.btn.btn-danger.col-4.deleteNodeButton(id='delete-button' type='button' onclick='network.deleteSelected()')
 						i.fa.fa-trash
 						|  Delete
 				br
 				br
 				
-				//Ariq Code
 				#toolMoreInfo
+					//TODO: Fix the spacing in Add button
 					// Add Tool Collapse
 					#addToolGroup.collapse(data-parent='#toolMoreInfo')
 						.toolbox_main.btn-group.btn-group-toggle(data-toggle='buttons')
@@ -94,54 +122,197 @@ block content
 						br
 						br
 						.toolbox_main.btn-group.btn-group-toggle(data-toggle='buttons')
-							button.btn.btn-outline-primary(type='button' disabled='')
-								i.fa.fa-chevron-right
-								|  Edge
-							label.btn.btn-secondary
-								input.btn.btn-secondary(type='radio' onchange='toggleAddEdge(true)' autocomplete='off')
-								| On
-							label.btn.btn-secondary
-								input.btn.btn-outline-secondary(type='radio' onchange='toggleAddEdge(false)' autocomplete='off' checked)
-								| Off
-				br
-				br
-				
-				button.btn.btn-block.btn-success(type='button' onclick='playPressed()')
+								button.btn.btn-outline-primary.col-8(type='button' disabled='')
+									i.fa.fa-chevron-right
+									| Edge
+								label.btn.btn-secondary
+									input.toolbox_main.btn.btn-secondary.col-2(type='radio' onchange='toggleAddEdge(true)' autocomplete='off')
+									| On
+								label.btn.btn-secondary
+									input.toolbox_main.btn.btn-secondary.col-2(type='radio' onchange='toggleAddEdge(false)' autocomplete='off')
+									| Off
+						br
+						br
+
+				//Play and Stop Music
+				#playMusic.button.btn.btn-block.btn-success(type='button' onclick='playPressed()')
 					i.fa.fa-play
-					|  Play Music
+					|  Start Music
+				#stopMusic.button.btn.btn-block.btn-danger(type='button' onclick='stopPressed()')
+					i.fa.fa-pause
+					|  Stop Music
 			
 			//Network Display Section
 			#musicNetwork.col-6
 			#accordion.col-3
+				// Add new instrument card
 				.card
-					#headingOne.card-header
+					#headingDefault.card-header
 					h5.mb-0
-					button.btn.btn-primary(data-toggle='collapse' data-target='#collapseOne' aria-expanded="true" aria-controls='collapseOne') Instrument #1
-					#collapseOne.collapse.show(aria-labelledby='headingOne' data-parent='#accordion')
+					button.btn.btn-primary(data-toggle='collapse' data-target='#collapseDefault' aria-controls='collapseTwo') Default Instrument
+					#collapseDefault.collapse.show(aria-labelledby='headingDefault' data-parent='#accordion')
 						.card-body
+							span Wave Type:
+							#carouselExampleControls.carousel.slide(data-ride='carousel')
+								.carousel-inner
+									.carousel-item.active
+										img.d-block.w-100(src='/images/sine.png' alt='Sine Wave')
+									.carousel-item
+										img.d-block.w-100(src='/images/square.png' alt='Square Wave')
+									.carousel-item
+										img.d-block.w-100(src='/images/sawtooth.png' alt='Sawtooth Wave')
+									.carousel-item
+										img.d-block.w-100(src='/images/triangle.png' alt='Triangle Wave')
+								a.carousel-control-prev(href='#carouselExampleControls' role='button' data-slide='prev')
+									span.carouselButtons.carousel-control-prev-icon(saria-hidden='true')
+									span.sr-only Previous
+								a.carousel-control-next(href='#carouselExampleControls' role='button' data-slide='next')
+									span.carouselButtons.carousel-control-next-icon(aria-hidden='true')
+									span.sr-only Next
+							.input-group-prepend
+								span.input-group-text A
+								input#adsrA.slider(onchange='updateAttack(this, "Instrument 1", 0)' type='range' min='0' max='1' value='0.5' step='0.01')
+								input#attackSpan0.form-control-plaintext(type='text' readonly='' value='1.25')
+							.input-group-prepend
+								span.input-group-text D
+								input#adsrA.slider(onchange='updateDecay(this, "Instrument 1", 0)' type='range' min='0' max='1' value='0.5' step='0.01')
+								input#decaySpan0.form-control-plaintext(type='text' readonly='' value='1.25')
+							.input-group-prepend
+								span.input-group-text S
+								input#adsrS.slider(onchange='updateSustain(this, "Instrument 1", 0)' type='range' min='0' max='1' value='0.5' step='0.01')
+								input#sustainSpan0.form-control-plaintext(type='text' readonly='' value='0.43')
+							.input-group-prepend
+								span.input-group-text R
+								input#adsrR.slider(onchange='updateRelease(this, "Instrument 1", 0)' type='range' min='0' max='1' value='0.5' step='0.01')
+								input#releaseSpan0.form-control-plaintext(type='text' readonly='' value='1.25')
+				// Add new instrument card
 				.card
-					#headingTwo.card-header
+					#headingDefault.card-header
 					h5.mb-0
-					button.btn.btn-primary(data-toggle='collapse' data-target='#collapseTwo' aria-controls='collapseTwo') Instrument #2
-					#collapseTwo.collapse.show(aria-labelledby='headingTwo' data-parent='#accordion')
-						.adsr
-							.input-group.mb-2
-								.input-group-prepend
-									span#basic-addon1.input-group-text A
-								input.form-control(type='text' placeholder='0-5' aria-describedby='basic-addon1')
-							.input-group.mb-2
-								.input-group-prepend
-									span#basic-addon1.input-group-text D
-								input.form-control(type='text' placeholder='0-5' aria-describedby='basic-addon1')
-							.input-group.mb-2
-								.input-group-prepend
-									span#basic-addon1.input-group-text S
-								input.form-control(type='text' placeholder='0-5' aria-describedby='basic-addon1')
-							.input-group.mb-2
-								.input-group-prepend
-									span#basic-addon1.input-group-text R
-								input.form-control(type='text' placeholder='0-5' aria-describedby='basic-addon1')
-								
-			pre#eventSpan.
+					button.btn.btn-primary(data-toggle='collapse' data-target='#collapseGamer' aria-controls='collapseTwo') Gamer Instrument
+					#collapseGamer.collapse(aria-labelledby='headingDefault' data-parent='#accordion')
+						.card-body
+							span Wave Type:
+							#carouselExampleControls.carousel.slide(data-ride='carousel')
+								.carousel-inner
+									.carousel-item.active
+										img.d-block.w-100(src='/images/sine.png' alt='Sine Wave')
+									.carousel-item
+										img.d-block.w-100(src='/images/square.png' alt='Square Wave')
+									.carousel-item
+										img.d-block.w-100(src='/images/sawtooth.png' alt='Sawtooth Wave')
+									.carousel-item
+										img.d-block.w-100(src='/images/triangle.png' alt='Triangle Wave')
+								a.carousel-control-prev(href='#carouselExampleControls' role='button' data-slide='prev')
+									span.carouselButtons.carousel-control-prev-icon(saria-hidden='true')
+									span.sr-only Previous
+								a.carousel-control-next(href='#carouselExampleControls' role='button' data-slide='next')
+									span.carouselButtons.carousel-control-next-icon(aria-hidden='true')
+									span.sr-only Next
+							.input-group-prepend
+								span.input-group-text A
+								input#adsrA.slider(onchange='updateAttack()' type='range' min='0' max='1' value='0.5' step='0.01')
+								input#attackSpan0.form-control-plaintext(type='text' readonly='' value='0.5')
+							.input-group-prepend
+								span.input-group-text D
+								input#adsrA.slider(onchange='updateDecay(0)' type='range' min='0' max='1' value='0.5' step='0.01')
+								input#decaySpan0.form-control-plaintext(type='text' readonly='' value='0.5')
+							.input-group-prepend
+								span.input-group-text S
+								input#adsrS.slider(type='range' min='0' max='5' value='2' step='0.1')
+								input#sustainSpan0.form-control-plaintext(type='text' readonly='' value='0.5')
+							.input-group-prepend
+								span.input-group-text R
+								input#adsrR.slider(type='range' min='0' max='5' value='2' step='0.1')
+								input#releaseSpan0.form-control-plaintext(type='text' readonly='' value='0.5')
+							#moreOptions
+								.card
+									button.btn.btn-secondary.btn-sm(data-toggle='collapse' data-target='#collapseFilter') Filter
+									#collapseFilter.collapse(aria-labelledby='headingDefault' data-parent='#moreOptions')
+										span.input-group-text cut-off
+											input#adsrA.slider(onchange='' type='range' min='0' max='1' value='0.5' step='0.01')
+											span.input-group-text type
+												select#cutOff.form-control
+													option lowpass
+													option highpass
+													option bandpass
+								.card
+									button.btn.btn-secondary.btn-sm(data-toggle='collapse' data-target='#collapseReverb') Reverb
+									#collapseReverb.collapse(aria-labelledby='headingDefault' data-parent='#moreOptions')
+										span.input-group-text.col-12 decay
+											input#adsrA.slider(onchange='' type='range' min='0' max='1' value='0.5' step='0.01')
+										span.input-group-text.col-12 dry-wet
+											input#adsrA.slider(onchange='' type='range' min='0' max='1' value='0.5' step='0.01')
+								.card
+									button.btn.btn-secondary.btn-sm(data-toggle='collapse' data-target='#collapseDelay') Delay
+									#collapseDelay.collapse(aria-labelledby='headingDefault' data-parent='#moreOptions')
+										span.input-group-text time interval
+											select#cutOff.form-control
+												option  1
+												option  2
+												option  3
+												option  4
+												option  5
+												option  6
+												option  7
+												option  8
+												option  9
+												option  10
+												option  11
+												option  12
+												option  13
+												option  14
+												option  15
+												option  16
+											span.input-group-text :
+											select#cutOff.form-control
+												option  1
+												option  2
+												option  4
+												option  8
+												option  16
+										span.input-group-text.col-12 feedback
+											input#adsrA.slider(onchange='' type='range' min='0' max='1' value='0.5' step='0.01')
+										span.input-group-text.col-12 dry-wet
+											input#adsrA.slider(onchange='' type='range' min='0' max='1' value='0.5' step='0.01')
 
-			
+				// Add new instrument card
+				.card
+					#headingDefault.card-header
+					h5.mb-0
+					button.btn.btn-primary(data-toggle='collapse' data-target='#collapseThree' aria-controls='collapseTwo') Custom Instrument
+					#collapseThree.collapse(aria-labelledby='headingDefault' data-parent='#accordion')
+						.card-body
+							span Wave Type:
+							#carouselExampleControls.carousel.slide(data-ride='carousel')
+								.carousel-inner
+									.carousel-item.active
+										img.d-block.w-100(src='/images/sine.png' alt='Sine Wave')
+									.carousel-item
+										img.d-block.w-100(src='/images/square.png' alt='Square Wave')
+									.carousel-item
+										img.d-block.w-100(src='/images/sawtooth.png' alt='Sawtooth Wave')
+									.carousel-item
+										img.d-block.w-100(src='/images/triangle.png' alt='Triangle Wave')
+								a.carousel-control-prev(href='#carouselExampleControls' role='button' data-slide='prev')
+									span.carouselButtons.carousel-control-prev-icon(saria-hidden='true')
+									span.sr-only Previous
+								a.carousel-control-next(href='#carouselExampleControls' role='button' data-slide='next')
+									span.carouselButtons.carousel-control-next-icon(aria-hidden='true')
+									span.sr-only Next
+							.input-group-prepend
+								span.input-group-text A
+								input#adsrA.slider(onchange='updateAttack(0)' type='range' min='0' max='1' value='0.5' step='0.01')
+								input#attackSpan0.form-control-plaintext(type='text' readonly='' value='0.5')
+							.input-group-prepend
+								span.input-group-text D
+								input#adsrA.slider(onchange='updateDecay(0)' type='range' min='0' max='1' value='0.5' step='0.01')
+								input#decaySpan0.form-control-plaintext(type='text' readonly='' value='0.5')
+							.input-group-prepend
+								span.input-group-text S
+								input#adsrS.slider(type='range' min='0' max='5' value='2' step='0.1')
+								input#sustainSpan0.form-control-plaintext(type='text' readonly='' value='0.5')
+							.input-group-prepend
+								span.input-group-text R
+								input#adsrR.slider(type='range' min='0' max='5' value='2' step='0.1')
+								input#releaseSpan0.form-control-plaintext(type='text' readonly='' value='0.5')
