@@ -1,3 +1,5 @@
+//const { token } = require("morgan");
+
 // Set-up
 let current_note = ['C',''];
 let root_node;
@@ -22,23 +24,26 @@ var locales = {
     }
 }
 
-var default_instrument = new Instrument("sine", 0.1, 1, 0.5, 1, 1, null, null, null);
+var default_instrument = new Instrument("sawtooth", 0.01, 0.05, 0.001, 1, 1, new Filter(1000, "lowpass"), new Reverb(1, 0.3), new Delay(0.1, 0.5, 0.5));
 
 // create an array with nodes
+// mode can be "Full Random" = randomly chooses
 var nodes = new vis.DataSet([
-    {id: 1, label: 'A4', interval: 1000, timer: setTimeout(() => {}, 0), instrument: default_instrument},
-    {id: 2, label: 'C#4', interval: 1000, timer: setTimeout(() => {}, 0), instrument: default_instrument},
-    {id: 3, label: 'B4', interval: 1000, timer: setTimeout(() => {}, 0), instrument: default_instrument},
-    {id: 4, label: 'Eb4', interval: 1000, timer: setTimeout(() => {}, 0), instrument: default_instrument},
-    {id: 5, label: 'G4', interval: 1000, timer: setTimeout(() => {}, 0), instrument: default_instrument}
+    {id: 0, label: 'Bb4', interval: 500, timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Full Random"},
+    {id: 1, label: 'D4', interval: 500, timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Full Random"},
+    {id: 2, label: 'F4', interval: 500, timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Full Random"},
+    {id: 3, label: 'A4', interval: 500, timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Full Random"},
+    {id: 4, label: 'G4', interval: 500, timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Full Random"}
 ]);
 
 // create an array with edges
 var edges = new vis.DataSet([
+    {from: 0, to: 2, interval: 1000},
+    {from: 0, to: 1, interval: 1000},
     {from: 1, to: 3, interval: 1000},
-    {from: 1, to: 2, interval: 1000},
+    {from: 1, to: 4, interval: 1000},
     {from: 2, to: 4, interval: 1000},
-    {from: 2, to: 5, interval: 1000}
+    {from: 2, to: 3, interval: 1000}
 ]);
 
 // node functions set-up 
@@ -108,23 +113,27 @@ function triggerNode(node) {
     node.timer = setTimeout(() => { node.instrument.release_note(node.label, node.id) }, node.interval);
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // Traversing to play music
-function playPressed() {
+async function playPressed() {
+    await Tone.start();
     network.disableEditMode();
-    nodeList = nodes.get({fields: ['id', 'label', 'timer', 'instrument']});
+    nodeList = nodes.get({fields: ['id', 'label', 'interval', 'timer', 'instrument']});
     edgeList = edges.get({fields:["from", "to"]});
     var randomRoot = nodeList[Math.floor(Math.random()*nodeList.length)];
     current_node = randomRoot.id;
     console.log(randomRoot);
-    playNextNode(current_node, nodeList);
+    while (true) {
+        current_node = getNextNode(current_node);
+        console.log(nodeList[current_node]);
+        triggerNode(nodeList[current_node]);
+        await sleep(200);
+    }
 }
-function playNextNode(nodeId, nodeList) {
-    current_node = getNextNode(current_node);
-    console.log(current_node);
-    console.log(nodeList[current_node - 1]);
-    triggerNode(nodeList[current_node - 1]);
-    setTimeout(() => { playNextNode(current_node, nodeList); }, 1000); 
-}
+
 function getNextNode(node_id) {
     let neighboring_nodes = network.getConnectedNodes(node_id);
     // Add play sound function here
@@ -146,7 +155,7 @@ var options = {
         keyboard: true
     },
     manipulation: {
-        enabled: true,
+        enabled: false,
         addNode: function(nodeData,callback) {
             current_note = prompt("Please enter note");
             if (current_note != "") {

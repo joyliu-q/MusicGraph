@@ -1,7 +1,6 @@
 function Instrument(wave_name, attack, decay, sustain, release, gain, filter, reverb, delay) {
     let synth = new Tone.PolySynth();
     synth.set({oscillator: {type: wave_name}, envelope: {attack: attack, decay: decay, decayCurve: "linear", sustain: sustain, release: release, releaseCurve: "linear"}})
-
     this.synth = synth;
     if (filter != null) {
         this.filter = new Tone.Filter({frequency: filter.cutoff, type: filter.type});
@@ -9,18 +8,17 @@ function Instrument(wave_name, attack, decay, sustain, release, gain, filter, re
         this.filter = null;
     }
     if (reverb != null) {
-        this.reverb = new Tone.Reverb(reverb.cutoff, reverb.type);
+        this.reverb = new Tone.Reverb({decay: reverb.decay, wet: reverb.wet});
     } else {
         this.reverb = null;
     }
     if (delay != null) {
-        this.delay = new Tone.FeedbackDelay(delay.time, delay.feedback);
+        this.delay = new Tone.FeedbackDelay({delayTime: delay.time, feedback: delay.feedback, wet: delay.wet});
     } else {
         this.delay = null;
     }
     this.gain = new Tone.Gain(gain).toDestination();
     this.key_map = new Map();
-
     this.rebuild = function() {
         let effects_list = [];
         if (filter != null) {
@@ -42,7 +40,6 @@ function Instrument(wave_name, attack, decay, sustain, release, gain, filter, re
             this.synth.connect(this.gain);
         }
     };
-    
     this.rebuild();
     this.set_wave_form = function(wave_form) {
         this.synth.set({oscillator: {type: wave_form}});
@@ -118,8 +115,8 @@ function Instrument(wave_name, attack, decay, sustain, release, gain, filter, re
     },
     this.release_note = function(key, id) {
         if (this.key_map.get(key) != id) {
-            console.log("key taken by another node")
         } else {
+            this.key_map.delete(key);
             this.synth.triggerRelease([key]);
         }
     }
@@ -135,7 +132,8 @@ function Reverb(decay, wet) {
     this.wet = wet;
 }
 
-function Delay(time, feedback) {
+function Delay(time, feedback, wet) {
     this.time = time;
     this.feedback = feedback;
+    this.wet = wet;
 }
