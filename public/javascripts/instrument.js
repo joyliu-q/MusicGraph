@@ -25,7 +25,9 @@ function Instrument(name, wave_name, attack, decay, sustain, release, gain, filt
         this.reverb = null;
     }
     if (delay != null) {
-        this.delay = new Tone.FeedbackDelay({delayTime: delay.time[0] / delay.time[1] * secPerBeat * 1000, feedback: delay.feedback, wet: delay.wet});
+        let time = delay.time[0] / delay.time[1] * secPerBeat;
+        this.delay = new Tone.FeedbackDelay({delayTime: time, feedback: delay.feedback, wet: delay.wet});
+
         this.time = delay.time;
         this.feedback = delay.feedback;
         this.delay_wet = delay.wet;
@@ -35,15 +37,19 @@ function Instrument(name, wave_name, attack, decay, sustain, release, gain, filt
     this.gain = new Tone.Gain(gain).toDestination();
     this.key_map = new Map();
     this.rebuild = function() {
+        this.synth.disconnect();
         let effects_list = [];
-        if (filter != null) {
+        if (this.filter != null) {
+            this.filter.disconnect();
             effects_list.push(this.filter);
         }
-        if (reverb != null) {
+        if (this.reverb != null) {
+            this.reverb.disconnect();
             effects_list.push(this.reverb);
         }
-        if (delay != null) {
-            this.delay.set({delayTime: this.time[0] / this.time[1] * secPerBeat * 1000})
+        if (this.delay != null) {
+            this.delay.disconnect();
+            this.delay.set({delayTime: this.time[0] / this.time[1] * secPerBeat})
             effects_list.push(this.delay);
         }
         if (effects_list.length > 0) {
@@ -79,7 +85,7 @@ function Instrument(name, wave_name, attack, decay, sustain, release, gain, filt
         this.gain.set({gain: gain});
     };
     this.set_filter_cutoff = function(cutoff) {
-        this.filter.set({cutoff: cutoff});
+        this.filter.set({fredquency: cutoff});
         this.cutoff = cutoff;
     };
     this.set_filter_type = function(type) {
@@ -95,9 +101,17 @@ function Instrument(name, wave_name, attack, decay, sustain, release, gain, filt
         this.reverb_wet = mix;
     };
     this.set_delay_time = function(time) {
-        this.delay.set({time: time[0] / time[1] * secPerBeat * 1000});
         this.time = time;
+        this.delay.set({delayTime: this.time[0] / this.time[1] * secPerBeat});
     };
+    this.set_delay_time_top = function(num) {
+        this.time[0] = num;
+        this.delay.set({delayTime: this.time[0] / this.time[1] * secPerBeat});
+    }
+    this.set_delay_time_bot = function(num) {
+        this.time[1] = num;
+        this.delay.set({delayTime: this.time[0] / this.time[1] * secPerBeat});
+    }
     this.set_delay_feedback = function(feedback) {
         this.delay.set({feedback: feedback});
         this.feedback = feedback;
@@ -132,7 +146,7 @@ function Instrument(name, wave_name, attack, decay, sustain, release, gain, filt
         return this.reverb.get().wet;
     };
     this.get_delay_time = function() {
-        return this.time;
+        return this.delayTime;
     };
     this.get_delay_feedback = function() {
         return this.delay.get().feedback;
@@ -154,13 +168,35 @@ function Instrument(name, wave_name, attack, decay, sustain, release, gain, filt
         }
         this.rebuild();
     }
-    this.toggle_filter = function() {
-        if (this.filter != null) {
-            this.filter = null;
+    this.toggle_delay = function() {
+        if (this.delay != null) {
+            this.delay = null;
         } else {
-            this.delay = new Tone.FeedbackDelay({delayTime: this.time, feedback: this.feedback, wet: this.delay_wet});
+            this.delay = new Tone.FeedbackDelay({delayTime: this.time[0] / this.time[1] * secPerBeat, feedback: this.feedback, wet: this.delay_wet});
         }
         this.rebuild();
+    }
+
+    this.filter_enabled = function() {
+        if (this.filter != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    this.reverb_enabled = function() {
+        if (this.reverb != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    this.delay_enabled = function() {
+        if (this.delay != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     this.press_note = function(key, id) {

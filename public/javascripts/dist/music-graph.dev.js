@@ -11,18 +11,14 @@ var edgeMode = false;
 var bpm = 120;
 var secPerBeat = 4 * 60 / bpm;
 var play = false;
-var instrument1 = new Instrument("default", "sawtooth", 0.01, 0.05, 0.001, 1, 0.9, new Filter(1000, "lowpass"), new Reverb(1, 0.3), null);
-var instrument2 = new Instrument("default", "square", 0.01, 0.05, 0.001, 1, 0.2, null, null, null);
-var instrument3 = new Instrument("default", "sine", 0.5, 0.1, 0.001, 3, 0.7, null, new Reverb(1, 0.7), Delay(1 / 16 * secPerBeat * 1000, 0.5));
+var instrument1 = new Instrument("Instrument 1", "sine", 1.25, 1.25, 0.43, 1.25, 0.9, new Filter(1270, "lowpass"), new Reverb(2.5, 0.5), new Delay([1, 8], 0.5, 0.5));
+var instrument2 = new Instrument("Instrument 2", "sine", 1.25, 1.25, 0.43, 1.25, 0.9, new Filter(1270, "lowpass"), new Reverb(2.5, 0.5), new Delay([1, 8], 0.5, 0.5));
+var instrument3 = new Instrument("instrument 3", "sine", 1.25, 1.25, 0.43, 1.25, 0.9, new Filter(1270, "lowpass"), new Reverb(2.5, 0.5), new Delay([1, 8], 0.5, 0.5));
 var listOfInstruments = {
   "Instrument 1": instrument1,
   "Instrument 2": instrument2,
   "Instrument 3": instrument3
-}; // Shady
-
-$('.carousel').carousel({
-  interval: false
-}); // Add New Instrument TBD
+}; // Add New Instrument TBD
 
 function addNewInstrument() {
   var instrumentName = document.getElementById('newInstrumentName').value;
@@ -32,29 +28,114 @@ function addNewInstrument() {
   }]);
 }
 
-function updateAttack(elem, index, span) {
+function updateAttack(elem, id) {
   var value = 5 * Math.pow(elem.value, 2);
   console.log(value);
-  document.getElementById("attackSpan" + span).value = Math.round(value * 100) / 100;
-  listOfInstruments[index].set_attack(value);
+  document.getElementById("attackSpan" + id).value = Math.round(value * 100) / 100;
+  listOfInstruments["Instrument " + (id + 1)].set_attack(value);
 }
 
-function updateDecay(elem, index, span) {
+function updateDecay(elem, id) {
   var value = 5 * Math.pow(elem.value, 2);
-  document.getElementById("decaySpan" + span).value = Math.round(value * 100) / 100;
-  listOfInstruments[index].set_decay(value);
+  document.getElementById("decaySpan" + id).value = Math.round(value * 100) / 100;
+  listOfInstruments["Instrument " + (id + 1)].set_decay(value);
 }
 
-function updateSustain(elem, index, span) {
-  var value = Math.pow(elem.value, 1.2);
-  document.getElementById("sustainSpan" + span).value = Math.round(value * 100) / 100;
-  listOfInstruments[index].set_sustain(value);
+function updateSustain(elem, id) {
+  var value = Math.pow(elem.value, 1.2) + 0.0001;
+  document.getElementById("sustainSpan" + id).value = Math.round(value * 100) / 100;
+  listOfInstruments["Instrument " + (id + 1)].set_sustain(value);
 }
 
-function updateRelease(elem, index, span) {
+function updateRelease(elem, id) {
   var value = 10 * Math.pow(elem.value, 2);
-  document.getElementById("releaseSpan" + span).value = Math.round(value * 100) / 100;
-  listOfInstruments[index].set_release(value);
+  document.getElementById("releaseSpan" + id).value = Math.round(value * 100) / 100;
+  listOfInstruments["Instrument " + (id + 1)].set_release(value);
+}
+
+function updateCutoff(elem, id) {
+  var value = 20000 * Math.pow(elem.value, 4) + 20;
+  document.getElementById("cutoffSpan" + id).value = Math.round(value);
+  listOfInstruments["Instrument " + (id + 1)].set_filter_cutoff(value);
+}
+
+function updateFilterType(elem, id) {
+  var type = elem.value;
+  listOfInstruments["Instrument " + (id + 1)].set_filter_type(type);
+}
+
+function updateReverbDecay(elem, id) {
+  var value = 10 * Math.pow(elem.value, 2) + 0.0001;
+  document.getElementById("reverbDecaySpan" + id).value = Math.round(value * 100) / 100;
+  listOfInstruments["Instrument " + (id + 1)].set_reverb_decay(value);
+}
+
+function updateReverbMix(elem, id) {
+  var value = elem.value;
+  document.getElementById("reverbMixSpan" + id).value = Math.round(value * 100) / 100;
+  listOfInstruments["Instrument " + (id + 1)].set_reverb_mix(value);
+}
+
+function updateDelayTimeTop(elem, id) {
+  var value = elem.value;
+  console.log("top");
+  listOfInstruments["Instrument " + (id + 1)].set_delay_time_top(value);
+}
+
+function updateDelayTimeBot(elem, id) {
+  var value = elem.value;
+  listOfInstruments["Instrument " + (id + 1)].set_delay_time_bot(value);
+}
+
+function updateDelayFeedback(elem, id) {
+  var value = elem.value;
+  document.getElementById("delayFeedbackSpan" + id).value = Math.round(value * 100) / 100;
+  listOfInstruments["Instrument " + (id + 1)].set_delay_feedback(value);
+}
+
+function updateDelayMix(elem, id) {
+  var value = elem.value;
+  document.getElementById("delayMixSpan" + id).value = Math.round(value * 100) / 100;
+  listOfInstruments["Instrument " + (id + 1)].set_delay_mix(value);
+}
+
+function updateGain(elem, id) {
+  var value = elem.value;
+  document.getElementById("gainSpan" + id).value = Math.round(value * 100) / 100;
+  listOfInstruments["Instrument " + (id + 1)].set_gain(value);
+}
+
+function updateFilter(id) {
+  if ($("#filterCheck" + id).is(':checked')) {
+    $("#filterButton" + id).removeClass("disabled");
+  } else {
+    $("#filterButton" + id).addClass("disabled");
+    $("#collapseFilter" + id).collapse('hide');
+  }
+
+  listOfInstruments["Instrument " + (id + 1)].toggle_filter();
+}
+
+function updateReverb(id) {
+  if ($("#reverbCheck" + id).is(':checked')) {
+    $("#reverbButton" + id).removeClass("disabled");
+  } else {
+    $("#reverbButton" + id).addClass("disabled");
+    $("#collapseReverb" + id).collapse('hide');
+  }
+
+  listOfInstruments["Instrument " + (id + 1)].toggle_reverb();
+}
+
+function updateDelay(id) {
+  if ($("#delayCheck" + id).is(':checked')) {
+    $("#delayButton" + id).removeClass("disabled");
+  } else {
+    $("#delayButton" + id).addClass("disabled");
+    $("#collapseDelay" + id).collapse('hide');
+  }
+
+  listOfInstruments["Instrument " + (id + 1)].toggle_delay();
 } // Log Slider lmao
 
 
@@ -63,91 +144,245 @@ function convertLog(position) {
   return Math.exp(Math.log(5) * position);
 }
 
-$("#slider").roundSlider(); // create an array with nodes
+$("#slider").roundSlider(); // Custom Carousel 
+
+var slide0 = 0;
+var slide1 = 1;
+var slide2 = 2;
+
+function nextImage(id) {
+  var elem = document.getElementById("waveIMG" + id);
+
+  if (id == 0) {
+    slide0 = (slide0 + 1) % 4 + 4;
+    var arr = valueToWaveform(slide0 - 4);
+    elem.src = arr[0];
+    elem.alt = arr[1];
+    listOfInstruments["Instrument " + (id + 1)].set_wave_form(arr[1]);
+  }
+
+  if (id == 1) {
+    slide1 = (slide1 + 1) % 4 + 4;
+
+    var _arr = valueToWaveform(slide1 - 4);
+
+    elem.src = _arr[0];
+    elem.alt = _arr[1];
+    listOfInstruments["Instrument " + (id + 1)].set_wave_form(_arr[1]);
+  }
+
+  if (id == 2) {
+    slide2 = (slide2 + 1) % 4 + 4;
+
+    var _arr2 = valueToWaveform(slide2 - 4);
+
+    elem.src = _arr2[0];
+    elem.alt = _arr2[1];
+    listOfInstrumentst["Instrument " + (id + 1)].set_wave_form(_arr2[1]);
+  }
+}
+
+function previousImage(id) {
+  var elem = document.getElementById("waveIMG" + id);
+
+  if (id == 0) {
+    slide0 = (slide0 - 1) % 4 + 4;
+    console.log(slide0 - 4);
+    var arr = valueToWaveform(slide0 - 4);
+    elem.src = arr[0];
+    elem.alt = arr[1];
+    listOfInstruments["Instrument " + (id + 1)].set_wave_form(arr[1]);
+  }
+
+  if (id == 1) {
+    slide1 = (slide1 - 1) % 4 + 4;
+
+    var _arr3 = valueToWaveform(slide1 - 4);
+
+    elem.src = _arr3[0];
+    elem.alt = _arr3[1];
+    listOfInstruments["Instrument " + (id + 1)].set_wave_form(_arr3[1]);
+  }
+
+  if (id == 2) {
+    slide2 = (slide2 - 1) % 4 + 4;
+
+    var _arr4 = valueToWaveform(slide2 - 4);
+
+    elem.src = _arr4[0];
+    elem.alt = _arr4[1];
+    listOfInstruments["Instrument " + (id + 1)].set_wave_form(_arr4[1]);
+  }
+}
+
+function valueToWaveform(v) {
+  if (v == 0) {
+    return ["/images/sine.png", "sine"];
+  } else if (v == 1) {
+    return ["/images/square.png", "square"];
+  } else if (v == 2) {
+    return ["/images/triangle.png", "triangle"];
+  } else {
+    return ["/images/sawtooth.png", "sawtooth"];
+  }
+} // create an array with nodes
 // mode can be "Complete" = randomly chooses, "Single" = chooses a single node, "None" 
+
 
 var nodes = new vis.DataSet([{
   id: 0,
-  label: 'Bb4',
-  interval: [1, 4],
+  label: 'G2',
+  interval: [1, 1],
   timer: setTimeout(function () {}, 0),
   instrument: instrument1,
-  mode: "Single",
+  mode: "None",
   root: true
 }, {
   id: 1,
-  label: 'D4',
-  interval: [1, 8],
+  label: 'F2',
+  interval: [1, 1],
   timer: setTimeout(function () {}, 0),
   instrument: instrument1,
-  mode: "Single",
+  mode: "None",
   root: false
 }, {
   id: 2,
-  label: 'F4',
-  interval: [1, 8],
+  label: 'Eb2',
+  interval: [1, 1],
   timer: setTimeout(function () {}, 0),
   instrument: instrument1,
-  mode: "Single",
+  mode: "None",
   root: false
 }, {
   id: 3,
-  label: 'A4',
-  interval: [1, 8],
+  label: 'C2',
+  interval: [1, 1],
   timer: setTimeout(function () {}, 0),
   instrument: instrument1,
-  mode: "Single",
+  mode: "None",
   root: false
 }, {
   id: 4,
   label: 'G4',
-  interval: [1, 8],
+  interval: [1, 2],
   timer: setTimeout(function () {}, 0),
-  instrument: instrument1,
-  mode: "Single",
+  instrument: instrument2,
+  mode: "None",
+  root: false
+}, {
+  id: 5,
+  label: 'A4',
+  interval: [1, 2],
+  timer: setTimeout(function () {}, 0),
+  instrument: instrument2,
+  mode: "None",
+  root: false
+}, {
+  id: 6,
+  label: 'F4',
+  interval: [1, 2],
+  timer: setTimeout(function () {}, 0),
+  instrument: instrument2,
+  mode: "None",
+  root: false
+}, {
+  id: 7,
+  label: 'Bb4',
+  interval: [1, 2],
+  timer: setTimeout(function () {}, 0),
+  instrument: instrument2,
+  mode: "None",
+  root: false
+}, {
+  id: 8,
+  label: 'D5',
+  interval: [1, 2],
+  timer: setTimeout(function () {}, 0),
+  instrument: instrument2,
+  mode: "None",
   root: false
 }]); // create an array with edges
 
 var edges = new vis.DataSet([{
   id: 0,
   from: 0,
-  to: 2,
-  interval: [2, 8]
+  to: 1,
+  interval: [1, 1]
 }, {
   id: 1,
   from: 0,
-  to: 1,
-  interval: [4, 8]
+  to: 4,
+  interval: [1, 2]
 }, {
   id: 2,
-  from: 1,
-  to: 0,
-  interval: [2, 8]
+  from: 0,
+  to: 7,
+  interval: [1, 2]
 }, {
   id: 3,
-  from: 1,
-  to: 3,
-  interval: [2, 8]
+  from: 0,
+  to: 8,
+  interval: [1, 2]
 }, {
   id: 4,
   from: 1,
-  to: 4,
-  interval: [4, 8]
+  to: 2,
+  interval: [1, 1]
 }, {
   id: 5,
-  from: 3,
-  to: 4,
-  interval: [2, 8]
+  from: 1,
+  to: 6,
+  interval: [1, 2]
 }, {
   id: 6,
-  from: 2,
-  to: 3,
-  interval: [2, 8]
+  from: 1,
+  to: 5,
+  interval: [1, 2]
 }, {
   id: 7,
-  from: 4,
+  from: 1,
+  to: 8,
+  interval: [1, 2]
+}, {
+  id: 8,
+  from: 2,
+  to: 3,
+  interval: [1, 1]
+}, {
+  id: 9,
+  from: 2,
+  to: 4,
+  interval: [1, 2]
+}, {
+  id: 10,
+  from: 2,
+  to: 7,
+  interval: [1, 2]
+}, {
+  id: 11,
+  from: 2,
+  to: 8,
+  interval: [1, 2]
+}, {
+  id: 12,
+  from: 3,
   to: 0,
-  interval: [4, 8]
+  interval: [1, 1]
+}, {
+  id: 13,
+  from: 3,
+  to: 4,
+  interval: [1, 2]
+}, {
+  id: 14,
+  from: 3,
+  to: 7,
+  interval: [1, 2]
+}, {
+  id: 15,
+  from: 3,
+  to: 8,
+  interval: [1, 2]
 }]);
 
 function triggerNode(node) {
@@ -184,6 +419,10 @@ function triggerNode(node) {
       }
     }
   });
+}
+
+function test() {
+  console.log($('#carouselOne .active').index('#carouselOne .item'));
 } //var prev_time;
 
 
@@ -287,11 +526,12 @@ function playNode(parentNode, delay) {
           triggerNode(parentNode);
           start = Date.now();
           nodeEdges = getNextNodes(parentNode);
+          console.log(nodeEdges);
           i = 0;
 
-        case 6:
+        case 7:
           if (!(i < nodeEdges[0].length)) {
-            _context3.next = 17;
+            _context3.next = 18;
             break;
           }
 
@@ -299,23 +539,23 @@ function playNode(parentNode, delay) {
           _interval = edge.interval[0] / edge.interval[1] * secPerBeat * 1000;
 
           if (!play) {
-            _context3.next = 13;
+            _context3.next = 14;
             break;
           }
 
           playNode(nodeEdges[0][i], _interval - (Date.now() - start));
-          _context3.next = 14;
+          _context3.next = 15;
           break;
-
-        case 13:
-          return _context3.abrupt("break", 17);
 
         case 14:
+          return _context3.abrupt("break", 18);
+
+        case 15:
           i++;
-          _context3.next = 6;
+          _context3.next = 7;
           break;
 
-        case 17:
+        case 18:
         case "end":
           return _context3.stop();
       }
@@ -329,16 +569,17 @@ function getNextNodes(node) {
 
   if (node.mode == "Complete") {
     nodes = [];
-    edges = [];
+    loc_edges = [];
 
-    for (node in neighboring_nodes) {
+    for (nn in neighboring_nodes) {
       if (Math.random > 0.5) {
-        nodes.push(node);
+        nodes.push(nodes.get(neighboring_nodes[nn]));
+        var child_edges = network.getConnectedEdges(neighboring_nodes[nn]);
 
-        loop: for (child_edge in network.getConnectedEdges(node)) {
-          for (parent_edge in parent_edges) {
-            if (child_edge == parent_edge) {
-              edges.push(parent_edge);
+        loop: for (ce = 0; ce < child_edges.length; ce++) {
+          for (j in parent_edges) {
+            if (child_edges[ce] == parent_edges[j]) {
+              loc_edges.push(parent_edges[j]);
               break loop;
             }
           }
@@ -346,51 +587,54 @@ function getNextNodes(node) {
       }
     }
 
-    return [nodes, edges];
+    return [nodes, loc_edges];
   }
 
   if (node.mode == "Single") {
     var nodeId = neighboring_nodes[Math.floor(Math.random() * neighboring_nodes.length)];
 
-    var _edges;
+    var _loc_edges;
 
-    var child_edges = network.getConnectedEdges(nodeId);
+    var _child_edges = network.getConnectedEdges(nodeId);
 
-    loop: for (i in child_edges) {
+    loop: for (i in _child_edges) {
       for (j in parent_edges) {
-        if (child_edges[i] == parent_edges[j]) {
-          _edges = parent_edges[j];
+        if (_child_edges[i] == parent_edges[j]) {
+          _loc_edges = parent_edges[j];
           break loop;
         }
       }
     }
 
-    return [[nodes.get(nodeId)], [_edges]];
+    return [[nodes.get(nodeId)], [_loc_edges]];
   }
 
-  loop: for (child_edge in getConnectedEdges(node)) {
-    for (parent_edge in parent_edges) {
-      if (child_edge == parent_edge) {
-        edges.push(parent_edge);
-        break loop;
-      }
-    }
-  }
+  console.log("hi");
+  loc_edges = [];
+  loc_nodes = [];
 
-  edges = [];
+  for (nn = 0; nn < neighboring_nodes.length; nn++) {
+    console.log(nn);
+    console.log(neighboring_nodes[nn]);
+    console.log(neighboring_nodes);
+    loc_nodes.push(nodes.get(neighboring_nodes[nn]));
 
-  for (node in neighboring_nodes) {
-    loop: for (child_edge in getConnectedEdges(node)) {
-      for (parent_edge in parent_edges) {
-        if (child_edge == parent_edge) {
-          edges.push(parent_edge);
+    var _child_edges2 = network.getConnectedEdges(neighboring_nodes[nn]);
+
+    console.log("got edges");
+
+    loop: for (ce = 0; ce < _child_edges2.length; ce++) {
+      for (j in parent_edges) {
+        if (_child_edges2[ce] == parent_edges[j]) {
+          loc_edges.push(parent_edges[j]);
           break loop;
         }
       }
     }
   }
 
-  return [neighboring_nodes, edges];
+  console.log("Done: " + loc_edges);
+  return [loc_nodes, loc_edges];
 }
 
 var currently_selected_nodes = [];
@@ -404,6 +648,9 @@ function saveNodeSubmit() {
   var instrument_str;
   var mode_str;
   var root_str;
+  var interval_inp = [$("#startNodeInterval")[0].value, $("#stopNodeInterval")[0].value]; //Debug
+
+  console.log(interval_inp);
   $('#noteButtons .active').each(function () {
     note = $(this)[0].innerText;
   });
@@ -441,14 +688,14 @@ function saveNodeSubmit() {
     nodeList = nodes.get({
       fields: ['id', 'label']
     });
-    nodes.add([{
+    nodes.add({
       id: nodeList.length + 1,
       label: note + accidentals[accidental] + octave,
       instrument: listOfInstruments[instrument_str],
       mode: mode_str,
       root: root_dict[root_str],
-      interval: [1, 8]
-    }]);
+      interval: interval_inp
+    });
     console.log(instrument_str, listOfInstruments[instrument_str]);
     force_save = false;
     return;
@@ -462,7 +709,7 @@ function saveNodeSubmit() {
     instrument: listOfInstruments[instrument_str],
     mode: mode_str,
     root: root_dict[root_str],
-    interval: [1, 8]
+    interval: interval_inp
   });
 }
 
@@ -473,7 +720,8 @@ function saveEdgeSubmit() {
     id: edge_id,
     interval: interval
   });
-}
+} //Trash version, doesn't show current settings
+
 
 function openEditModal() {
   if (currently_selected_nodes.length > 0) {
@@ -620,11 +868,7 @@ network.on("select", function (params) {
 });
 network.on("selectNode", function (params) {
   var node_index = params["nodes"][0];
-  nodeList = nodes.get({
-    fields: ['id', 'label', 'instrument', 'interval', 'timer']
-  });
-  console.log("Node selected:", nodeList[node_index]);
-  triggerNode(nodeList[node_index]);
+  triggerNode(nodes.get(node_index));
 });
 network.on("selectEdge", function (params) {
   console.log("selectEdge Event:", params);

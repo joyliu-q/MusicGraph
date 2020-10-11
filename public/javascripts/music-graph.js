@@ -6,15 +6,10 @@ let edgeMode = false;
 var bpm = 120;
 var secPerBeat = 4*60/bpm;
 var play = false;
-var instrument1 = new Instrument("default", "sawtooth", 0.01, 0.05, 0.001, 1, 0.9, new Filter(1000, "lowpass"), new Reverb(1, 0.3), null);
-var instrument2 = new Instrument("default", "square", 0.01, 0.05, 0.001, 1, 0.2, null, null, null);
-var instrument3 = new Instrument("default", "sine", 0.5, 0.1, 0.001, 3, 0.7, null, new Reverb(1, 0.7), Delay(1/16 * secPerBeat * 1000, 0.5));
+var instrument1 = new Instrument("Instrument 1", "sine", 1.25, 1.25, 0.43, 1.25, 0.9, new Filter(1270, "lowpass"), new Reverb(2.5, 0.5), new Delay([1, 8], 0.5, 0.5));
+var instrument2 = new Instrument("Instrument 2", "sine", 1.25, 1.25, 0.43, 1.25, 0.9, new Filter(1270, "lowpass"), new Reverb(2.5, 0.5), new Delay([1, 8], 0.5, 0.5));
+var instrument3 = new Instrument("instrument 3", "sine", 1.25, 1.25, 0.43, 1.25, 0.9, new Filter(1270, "lowpass"), new Reverb(2.5, 0.5), new Delay([1, 8], 0.5, 0.5));
 var listOfInstruments = {"Instrument 1": instrument1, "Instrument 2": instrument2, "Instrument 3": instrument3 };
-
-// Shady
-$('.carousel').carousel({
-    interval: false
-})
 
 // Add New Instrument TBD
 function addNewInstrument() {
@@ -25,26 +20,100 @@ function addNewInstrument() {
     ]);
 }
 
-function updateAttack(elem, index, span) {
+function updateAttack(elem, id) {
     let value = 5 * Math.pow(elem.value, 2);
     console.log(value);
-    document.getElementById("attackSpan" + span).value = Math.round(value * 100) / 100;
-    listOfInstruments[index].set_attack(value);
+    document.getElementById("attackSpan" + id).value = Math.round(value * 100) / 100;
+    listOfInstruments["Instrument " + (id + 1)].set_attack(value);
 }
-function updateDecay(elem, index, span) {
+function updateDecay(elem, id) {
     let value = 5 * Math.pow(elem.value, 2);
-    document.getElementById("decaySpan" + span).value = Math.round(value * 100) / 100;
-    listOfInstruments[index].set_decay(value);
+    document.getElementById("decaySpan" + id).value = Math.round(value * 100) / 100;
+    listOfInstruments["Instrument " + (id + 1)].set_decay(value);
 }
-function updateSustain(elem, index, span) {
-    let value = Math.pow(elem.value, 1.2);
-    document.getElementById("sustainSpan" + span).value = Math.round(value * 100) / 100;
-    listOfInstruments[index].set_sustain(value);
+function updateSustain(elem, id) {
+    let value = Math.pow(elem.value, 1.2) + 0.0001;
+    document.getElementById("sustainSpan" + id).value = Math.round(value * 100) / 100;
+    listOfInstruments["Instrument " + (id + 1)].set_sustain(value);
 }
-function updateRelease(elem, index, span) {
+function updateRelease(elem, id) {
     let value = 10 * Math.pow(elem.value, 2);
-    document.getElementById("releaseSpan" + span).value = Math.round(value * 100) / 100;
-    listOfInstruments[index].set_release(value);
+    document.getElementById("releaseSpan" + id).value = Math.round(value * 100) / 100;
+    listOfInstruments["Instrument " + (id + 1)].set_release(value);
+}
+function updateCutoff(elem, id) {
+    let value = 20000 * Math.pow(elem.value, 4) + 20;
+    document.getElementById("cutoffSpan" + id).value = Math.round(value);
+    listOfInstruments["Instrument " + (id + 1)].set_filter_cutoff(value);
+}
+function updateFilterType(elem, id) {
+    let type = elem.value;
+    listOfInstruments["Instrument " + (id + 1)].set_filter_type(type);
+}
+function updateReverbDecay(elem, id) {
+    let value = 10 * Math.pow(elem.value, 2) + 0.0001;
+    document.getElementById("reverbDecaySpan" + id).value = Math.round(value * 100) / 100;
+    listOfInstruments["Instrument " + (id + 1)].set_reverb_decay(value);
+}
+function updateReverbMix(elem, id) {
+    let value = elem.value;
+    document.getElementById("reverbMixSpan" + id).value = Math.round(value * 100) / 100;
+    listOfInstruments["Instrument " + (id + 1)].set_reverb_mix(value);
+}
+function updateDelayTimeTop(elem, id) {
+    let value = elem.value;
+    console.log("top");
+    listOfInstruments["Instrument " + (id + 1)].set_delay_time_top(value);
+}
+function updateDelayTimeBot(elem, id) {
+    let value = elem.value;
+    listOfInstruments["Instrument " + (id + 1)].set_delay_time_bot(value);
+}
+function updateDelayFeedback(elem, id) {
+    let value = elem.value;
+    document.getElementById("delayFeedbackSpan" + id).value = Math.round(value * 100) / 100;
+    listOfInstruments["Instrument " + (id + 1)].set_delay_feedback(value);
+}
+function updateDelayMix(elem, id) {
+    let value = elem.value;
+    document.getElementById("delayMixSpan" + id).value = Math.round(value * 100) / 100;
+    listOfInstruments["Instrument " + (id + 1)].set_delay_mix(value);
+}
+function updateGain(elem, id) {
+    let value = elem.value;
+    document.getElementById("gainSpan" + id).value = Math.round(value * 100) / 100;
+    listOfInstruments["Instrument " + (id + 1)].set_gain(value);
+}
+function updateFilter(id) {
+    if ($("#filterCheck"+id).is(':checked')) {
+        $("#filterButton"+id).removeClass("disabled");
+    }
+    else {
+        $("#filterButton"+id).addClass("disabled");
+        $("#collapseFilter"+id).collapse('hide');
+    }
+    
+    listOfInstruments["Instrument " + (id + 1)].toggle_filter();
+}
+function updateReverb(id) {
+    if ($("#reverbCheck"+id).is(':checked')) {
+        $("#reverbButton"+id).removeClass("disabled");
+    }
+    else {
+        $("#reverbButton"+id).addClass("disabled");
+        $("#collapseReverb"+id).collapse('hide');
+    }
+    listOfInstruments["Instrument " + (id + 1)].toggle_reverb();
+}
+function updateDelay(id) {
+    if ($("#delayCheck"+id).is(':checked')) {
+        $("#delayButton"+id).removeClass("disabled");
+    }
+    else {
+        $("#delayButton"+id).addClass("disabled");
+        $("#collapseDelay"+id).collapse('hide');
+    }
+    listOfInstruments["Instrument " + (id + 1)].toggle_delay();
 }
 
 // Log Slider lmao
@@ -55,26 +124,104 @@ function convertLog(position) {
 
 $("#slider").roundSlider();
 
+// Custom Carousel 
+var slide0 = 0;
+var slide1 = 1;
+var slide2 = 2;
+function nextImage(id) {
+    let elem = document.getElementById("waveIMG" + id);
+    if (id == 0) {
+        slide0 = (slide0 + 1) % 4 + 4;
+        let arr = valueToWaveform(slide0 - 4);
+        elem.src = arr[0];
+        elem.alt = arr[1];
+        listOfInstruments["Instrument " + (id + 1)].set_wave_form(arr[1]);
+    }
+    if (id == 1) {
+        slide1 = (slide1 + 1) % 4 + 4;
+        let arr = valueToWaveform(slide1 - 4);
+        elem.src = arr[0];
+        elem.alt = arr[1];
+        listOfInstruments["Instrument " + (id + 1)].set_wave_form(arr[1]);
+    }
+    if (id == 2) {
+        slide2 = (slide2 + 1) % 4 + 4;
+        let arr = valueToWaveform(slide2 - 4);
+        elem.src = arr[0];
+        elem.alt = arr[1];
+        listOfInstrumentst["Instrument " + (id + 1)].set_wave_form(arr[1]);
+    }
+}
+
+function previousImage(id) {
+    let elem = document.getElementById("waveIMG" + id);
+    if (id == 0) {
+        slide0 = (slide0 - 1) % 4 + 4;
+        console.log(slide0 - 4);
+        let arr = valueToWaveform(slide0 - 4);
+        elem.src = arr[0];
+        elem.alt = arr[1];
+        listOfInstruments["Instrument " + (id + 1)].set_wave_form(arr[1]);
+    }
+    if (id == 1) {
+        slide1 = (slide1 - 1) % 4 + 4;
+        let arr = valueToWaveform(slide1 - 4);
+        elem.src = arr[0];
+        elem.alt = arr[1];
+        listOfInstruments["Instrument " + (id + 1)].set_wave_form(arr[1]);
+    }
+    if (id == 2) {
+        slide2 = (slide2 - 1) % 4 + 4;
+        let arr = valueToWaveform(slide2 - 4);
+        elem.src = arr[0];
+        elem.alt = arr[1];
+        listOfInstruments["Instrument " + (id + 1)].set_wave_form(arr[1]);
+    }
+}
+
+function valueToWaveform(v) {
+    if (v == 0) {
+        return ["/images/sine.png", "sine"];
+    } else if (v == 1) {
+        return ["/images/square.png", "square"];
+    } else if (v == 2) {
+        return ["/images/triangle.png", "triangle"];
+    } else {
+        return ["/images/sawtooth.png", "sawtooth"];
+    }
+}
 // create an array with nodes
 // mode can be "Complete" = randomly chooses, "Single" = chooses a single node, "None" 
 var nodes = new vis.DataSet([
-    {id: 0, label: 'Bb4', interval: [1, 4], timer: setTimeout(() => {}, 0), instrument: instrument1, mode: "Single", root: true},
-    {id: 1, label: 'D4', interval: [1, 8], timer: setTimeout(() => {}, 0), instrument: instrument1, mode: "Single", root: false},
-    {id: 2, label: 'F4', interval: [1, 8], timer: setTimeout(() => {}, 0), instrument: instrument1, mode: "Single", root: false},
-    {id: 3, label: 'A4', interval: [1, 8], timer: setTimeout(() => {}, 0), instrument: instrument1, mode: "Single", root: false},
-    {id: 4, label: 'G4', interval: [1, 8], timer: setTimeout(() => {}, 0), instrument: instrument1, mode: "Single", root: false}
+    {id: 0, label: 'G2', interval: [1, 1], timer: setTimeout(() => {}, 0), instrument: instrument1, mode: "None", root: true},
+    {id: 1, label: 'F2', interval: [1, 1], timer: setTimeout(() => {}, 0), instrument: instrument1, mode: "None", root: false},
+    {id: 2, label: 'Eb2', interval: [1, 1], timer: setTimeout(() => {}, 0), instrument: instrument1, mode: "None", root: false},
+    {id: 3, label: 'C2', interval: [1, 1], timer: setTimeout(() => {}, 0), instrument: instrument1, mode: "None", root: false},
+    {id: 4, label: 'G4', interval: [1, 2], timer: setTimeout(() => {}, 0), instrument: instrument2, mode: "None", root: false},
+    {id: 5, label: 'A4', interval: [1, 2], timer: setTimeout(() => {}, 0), instrument: instrument2, mode: "None", root: false},
+    {id: 6, label: 'F4', interval: [1, 2], timer: setTimeout(() => {}, 0), instrument: instrument2, mode: "None", root: false},
+    {id: 7, label: 'Bb4', interval: [1, 2], timer: setTimeout(() => {}, 0), instrument: instrument2, mode: "None", root: false},
+    {id: 8, label: 'D5', interval: [1, 2], timer: setTimeout(() => {}, 0), instrument: instrument2, mode: "None", root: false},
 ]);
 
 // create an array with edges
 var edges = new vis.DataSet([
-    {id: 0, from: 0, to: 2, interval: [2, 8]},
-    {id: 1, from: 0, to: 1, interval: [4, 8]},
-    {id: 2, from: 1, to: 0, interval: [2, 8]},
-    {id: 3, from: 1, to: 3, interval: [2, 8]},
-    {id: 4, from: 1, to: 4, interval: [4, 8]},
-    {id: 5, from: 3, to: 4, interval: [2, 8]},
-    {id: 6, from: 2, to: 3, interval: [2, 8]},
-    {id: 7, from: 4, to: 0, interval: [4, 8]},
+    {id: 0, from: 0, to: 1, interval: [1, 1]},
+    {id: 1, from: 0, to: 4, interval: [1, 2]},
+    {id: 2, from: 0, to: 7, interval: [1, 2]},
+    {id: 3, from: 0, to: 8, interval: [1, 2]},
+    {id: 4, from: 1, to: 2, interval: [1, 1]},
+    {id: 5, from: 1, to: 6, interval: [1, 2]},
+    {id: 6, from: 1, to: 5, interval: [1, 2]},
+    {id: 7, from: 1, to: 8, interval: [1, 2]},
+    {id: 8, from: 2, to: 3, interval: [1, 1]},
+    {id: 9, from: 2, to: 4, interval: [1, 2]},
+    {id: 10, from: 2, to: 7, interval: [1, 2]},
+    {id: 11, from: 2, to: 8, interval: [1, 2]},
+    {id: 12, from: 3, to: 0, interval: [1, 1]},
+    {id: 13, from: 3, to: 4, interval: [1, 2]},
+    {id: 14, from: 3, to: 7, interval: [1, 2]},
+    {id: 15, from: 3, to: 8, interval: [1, 2]},
 ]);
 
 async function triggerNode(node) {
@@ -104,6 +251,10 @@ async function triggerNode(node) {
         nodes.update(node);
     }, 1000);
     
+}
+
+function test() {
+    console.log($('#carouselOne .active').index('#carouselOne .item'));
 }
 
 //var prev_time;
@@ -165,6 +316,7 @@ async function playNode(parentNode, delay) {
     triggerNode(parentNode);
     let start = Date.now();
     nodeEdges = getNextNodes(parentNode);
+    console.log(nodeEdges);
     for (i = 0; i < nodeEdges[0].length; i++) {
         let edge = edges.get(nodeEdges[1][i]);
         let interval = edge.interval[0] / edge.interval[1] * secPerBeat * 1000;
@@ -182,56 +334,59 @@ function getNextNodes(node) {
     // Add play sound function here
     if (node.mode == "Complete") {
         nodes = [];
-        edges = [];
-        for (node in neighboring_nodes) {
+        loc_edges = [];
+        for (nn in neighboring_nodes) {
             if (Math.random > 0.5) {
-                nodes.push(node);
-                loop: for (child_edge in network.getConnectedEdges(node)) {
-                    for (parent_edge in parent_edges) {
-                        if (child_edge == parent_edge) {
-                            edges.push(parent_edge);
+                nodes.push(nodes.get(neighboring_nodes[nn]));
+                let child_edges = network.getConnectedEdges(neighboring_nodes[nn]);
+                loop: for (ce = 0; ce < child_edges.length; ce++) {
+                    for (j in parent_edges) {
+                        if (child_edges[ce] == parent_edges[j]) {
+                            loc_edges.push(parent_edges[j]);
                             break loop;
                         }
                     }
                 }
             }
         }
-        return [nodes, edges];
+        return [nodes, loc_edges];
     }
     if (node.mode == "Single") {
         let nodeId = neighboring_nodes[Math.floor(Math.random()*neighboring_nodes.length)];
-        let edges;
+        let loc_edges;
         let child_edges = network.getConnectedEdges(nodeId);
         loop: for (i in child_edges) {
             for (j in parent_edges) {
                 if (child_edges[i] == parent_edges[j]) {
-                    edges = parent_edges[j];
+                    loc_edges = parent_edges[j];
                     break loop;
                 }
             }
         }
-        return [[nodes.get(nodeId)], [edges]];
+        return [[nodes.get(nodeId)], [loc_edges]];
     }
-    loop: for (child_edge in getConnectedEdges(node)) {
-        for (parent_edge in parent_edges) {
-            if (child_edge == parent_edge) {
-                edges.push(parent_edge);
-                break loop;
-            }
-        }
-    }
-    edges = [];
-    for (node in neighboring_nodes) {
-        loop: for (child_edge in getConnectedEdges(node)) {
-            for (parent_edge in parent_edges) {
-                if (child_edge == parent_edge) {
-                    edges.push(parent_edge);
+    console.log("hi");
+    loc_edges = [];
+    loc_nodes = [];
+    for (nn = 0; nn < neighboring_nodes.length; nn++) {
+        console.log(nn);
+        console.log(neighboring_nodes[nn]);
+        console.log(neighboring_nodes);
+        loc_nodes.push(nodes.get(neighboring_nodes[nn]));
+        let child_edges = network.getConnectedEdges(neighboring_nodes[nn]);
+        console.log("got edges");
+        loop: for (ce = 0; ce < child_edges.length; ce++) {
+            for (j in parent_edges) {
+                if (child_edges[ce] == parent_edges[j]) {
+                    loc_edges.push(parent_edges[j]);
                     break loop;
                 }
             }
         }
     }
-    return [neighboring_nodes, edges];
+    
+    console.log("Done: " + loc_edges);
+    return [loc_nodes, loc_edges];
 }
 
 var currently_selected_nodes = [];
@@ -247,6 +402,11 @@ function saveNodeSubmit()
     var mode_str;
     var root_str;
 
+    var interval_inp = [$("#startNodeInterval")[0].value, $("#stopNodeInterval")[0].value];
+    
+    //Debug
+    console.log(interval_inp);
+    
     $('#noteButtons .active').each(function(){
         note = $(this)[0].innerText;
     }); 
@@ -266,6 +426,7 @@ function saveNodeSubmit()
         root_str = $(this)[0].innerText;
     });
 
+
     //Debug
     //console.log(note, accidental, octave, instrument_str);
     
@@ -281,9 +442,7 @@ function saveNodeSubmit()
     if(currently_selected_nodes.length == 0 || force_save)
     {
         nodeList = nodes.get({fields: ['id', 'label']});
-        nodes.add([
-            {id: nodeList.length+1, label: note + accidentals[accidental] + octave, instrument: listOfInstruments[instrument_str], mode: mode_str, root: root_dict[root_str], interval: [1, 8]}
-        ]);
+        nodes.add({id: nodeList.length+1, label: note + accidentals[accidental] + octave, instrument: listOfInstruments[instrument_str], mode: mode_str, root: root_dict[root_str], interval: interval_inp});
         
         console.log(instrument_str, listOfInstruments[instrument_str]);
         
@@ -295,7 +454,7 @@ function saveNodeSubmit()
     //Edit pre-existing node
     var selected_node_id = currently_selected_nodes[0];
     
-    nodes.update({id: selected_node_id, label: note + accidentals[accidental] + octave, instrument: listOfInstruments[instrument_str], mode: mode_str, root: root_dict[root_str], interval: [1, 8]});
+    nodes.update({id: selected_node_id, label: note + accidentals[accidental] + octave, instrument: listOfInstruments[instrument_str], mode: mode_str, root: root_dict[root_str], interval: interval_inp});
 }
 
 function saveEdgeSubmit()
@@ -307,6 +466,7 @@ function saveEdgeSubmit()
     edges.update({id: edge_id, interval: interval});
 }
 
+//Trash version, doesn't show current settings
 function openEditModal() {
     if(currently_selected_nodes.length > 0)
     {   
@@ -454,9 +614,7 @@ network.on("select", function (params) {
 });
 network.on("selectNode", function (params) {
     let node_index = params["nodes"][0];
-    nodeList = nodes.get({fields: ['id', 'label', 'instrument', 'interval', 'timer']});
-    console.log("Node selected:", nodeList[node_index]);
-    triggerNode(nodeList[node_index]);
+    triggerNode(nodes.get(node_index));
 });
 network.on("selectEdge", function (params) {
     console.log("selectEdge Event:", params);
