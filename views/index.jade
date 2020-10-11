@@ -2,7 +2,10 @@ extends layout
 
 block content
 	.container-fluid
-		//Note Editor Modal
+		#title.align-items-center
+			h1 Music Graph
+			p Instructions: add notes and connections to a music network, then press play. 
+		//Note Edit Modal
 		#noteModal.modal.fade(tabindex='-1' role='dialog' aria-hidden='true')
 			.modal-dialog(role='document')
 				.modal-content
@@ -12,54 +15,85 @@ block content
 							span(aria-hidden='true') ×
 					.modal-body
 						span Music Note:
-						#noteButtons.btn-group.btn-group-toggle(role='group')
-							button.btn.btn-secondary(onclick="selectNote('A')") A
-							button.btn.btn-secondary(onclick="selectNote('B')") B
-							button.btn.btn-secondary(onclick="selectNote('C')") C
 						br
-						span Sharp/Flat:
-						#sharpOrFlat.btn-group.btn-group-toggle(role='group')
-							button.btn.btn-secondary(onclick="selectNote('sharp')") sharp/#
-							button.btn.btn-secondary(onclick="selectNote('natural')")  
-							button.btn.btn-secondary(onclick="selectNote('flat')") flat/♭
+						#noteButtons.btn-group.btn-group-toggle(role='group')
+							button.btn.btn-outline-primary(type="radio" onclick="$(this).addClass('active').siblings().removeClass('active');") A
+							button.btn.btn-outline-primary(type="radio" onclick="$(this).addClass('active').siblings().removeClass('active');") B
+							button.btn.btn-outline-primary(type="radio" onclick="$(this).addClass('active').siblings().removeClass('active');") C
+							button.btn.btn-outline-primary(type="radio" onclick="$(this).addClass('active').siblings().removeClass('active');") D
+							button.btn.btn-outline-primary(type="radio" onclick="$(this).addClass('active').siblings().removeClass('active');") E
+							button.btn.btn-outline-primary(type="radio" onclick="$(this).addClass('active').siblings().removeClass('active');") F
+							button.btn.btn-outline-primary.active(type="radio" onclick="$(this).addClass('active').siblings().removeClass('active');") G
+						br
+						span Sharp/Natural/Flat:
+						br
+						#accidentalButtons.btn-group.btn-group-toggle(role='group')
+							button.btn.btn-outline-primary(type="radio" onclick="$(this).addClass('active').siblings().removeClass('active');") Sharp
+							button.btn.btn-outline-primary.active(type="radio" onclick="$(this).addClass('active').siblings().removeClass('active');") Natural
+							button.btn.btn-outline-primary(type="radio" onclick="$(this).addClass('active').siblings().removeClass('active');") Flat
+						br
+						span Octave Number:
+						br
+						#octaveButtons.btn-group.btn-group-toggle(role='group')
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") 1
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") 2
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") 3
+							button.btn.btn-outline-primary.active(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") 4
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") 5
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") 6
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") 7
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") 8
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") 9
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") 10
+						br
+						span Instruments:
+						br
+						#instrumentButtons.btn-group.btn-group-toggle(role='group')
+							button.btn.btn-outline-primary.active(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Default
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Gamer
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Chill
+						br
+						br
+						#modeButtons.btn-group.btn-group-toggle(role='group')
+							button.btn.btn-outline-primary.active(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Single
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") Complete
+							button.btn.btn-outline-primary(type="radio" onclick = "$(this).addClass('active').siblings().removeClass('active');") None
+						br
+
 					.modal-footer
 						button.btn.btn-secondary(type='button' data-dismiss='modal') Close
-						button.btn.btn-primary(onclick='addNodeSubmit()' type='button' data-dismiss='modal' data-toggle='collapse') Save changes
+						button.btn.btn-primary(onclick='saveNodeSubmit()' type='button' data-dismiss='modal' data-toggle='collapse') Save changes
 		
 		.row.align-items-center
 			// Toolbox Section
-			#toolbox.col-2
-				h3 Toolbox
-				span Click a node and drag the edge to another node to connect them.
+			#toolbox.col-3
+				.toolboxText
+					h3 Toolbox
+					span Click a node and drag the edge to another node to connect them.
 				br
-				br
-				#toolbox_main.btn-group.btn-group-toggle(role='group')
-					button.btn.btn-primary(type='button' data-toggle='collapse' data-target='#addToolGroup')
+				.toolbox_main.btn-group.btn-group-toggle(role='group')
+					.button.btn.btn-primary.col-4(type='button' data-toggle='collapse' data-target='#addToolGroup')
 						i.fa.fa-plus
 						|  Add
-					button.btn.btn-warning(type='button' title='Edit Node' data-toggle='collapse' data-target='#editToolGroup')
+					.button.btn.btn-warning.col-4(id='edit-button' type='button' title='Edit Node' onclick='editOpenModal()')
 						i.fa.fa-pencil
 						|  Edit
-					button.btn.btn-danger.deleteNodeButton(type='button' data-toggle='collapse' data-target='#deleteToolGroup' onclick='network.deleteSelected()')
+					.button.btn.btn-danger.col-4.deleteNodeButton(type='button' onclick='network.deleteSelected()')
 						i.fa.fa-trash
 						|  Delete
 				br
 				br
+				
+				//Ariq Code
 				#toolMoreInfo
 					// Add Tool Collapse
 					#addToolGroup.collapse(data-parent='#toolMoreInfo')
-						.btn-group.btn-group-toggle(data-toggle='buttons')
-							button.btn.btn-outline-primary(type='button' disabled='')
-								i.fa.fa-chevron-right
-								|  Node
-							BUTTON.btn.btn-secondary(type='button' data-toggle='modal' data-target='#noteModal')
-								| Manual
-							label.btn.btn-secondary
-								input.btn.btn-secondary(type='radio' onchange='toggleAddNode(true)' autocomplete='off')
-								| Drag/Drop
+						.toolbox_main.btn-group.btn-group-toggle(data-toggle='buttons')
+							button.btn.btn-block.btn-secondary(type='button' data-toggle='modal' data-target='#noteModal' onclick='force_save = true')
+								|  Add Node
 						br
 						br
-						.btn-group.btn-group-toggle(data-toggle='buttons')
+						.toolbox_main.btn-group.btn-group-toggle(data-toggle='buttons')
 							button.btn.btn-outline-primary(type='button' disabled='')
 								i.fa.fa-chevron-right
 								|  Edge
@@ -67,22 +101,47 @@ block content
 								input.btn.btn-secondary(type='radio' onchange='toggleAddEdge(true)' autocomplete='off')
 								| On
 							label.btn.btn-secondary
-								input.btn.btn-secondary(type='radio' onchange='toggleAddEdge(false)' autocomplete='off')
+								input.btn.btn-outline-secondary(type='radio' onchange='toggleAddEdge(false)' autocomplete='off' checked)
 								| Off
-					// Edit Tool Collapse
-					#editToolGroup.collapse(data-parent='#toolMoreInfo')
-						label Click to select a node or edge to edit.
-					// Delete Tool Collapse
-					#deleteToolGroup.collapse(data-parent='#toolMoreInfo')
-						label Click to select a node or edge, then click the delete button above.
 				br
 				br
-				button.btn.btn-success(type='button' onclick='playPressed()')
+				
+				button.btn.btn-block.btn-success(type='button' onclick='playPressed()')
 					i.fa.fa-play
-					|  Play Music Mode
+					|  Play Music
+			
 			//Network Display Section
-			#musicNetwork.col-10
-		
-		.row
+			#musicNetwork.col-6
+			#accordion.col-3
+				.card
+					#headingOne.card-header
+					h5.mb-0
+					button.btn.btn-primary(data-toggle='collapse' data-target='#collapseOne' aria-expanded="true" aria-controls='collapseOne') Instrument #1
+					#collapseOne.collapse.show(aria-labelledby='headingOne' data-parent='#accordion')
+						.card-body
+				.card
+					#headingTwo.card-header
+					h5.mb-0
+					button.btn.btn-primary(data-toggle='collapse' data-target='#collapseTwo' aria-controls='collapseTwo') Instrument #2
+					#collapseTwo.collapse.show(aria-labelledby='headingTwo' data-parent='#accordion')
+						.adsr
+							.input-group.mb-2
+								.input-group-prepend
+									span#basic-addon1.input-group-text A
+								input.form-control(type='text' placeholder='0-5' aria-describedby='basic-addon1')
+							.input-group.mb-2
+								.input-group-prepend
+									span#basic-addon1.input-group-text D
+								input.form-control(type='text' placeholder='0-5' aria-describedby='basic-addon1')
+							.input-group.mb-2
+								.input-group-prepend
+									span#basic-addon1.input-group-text S
+								input.form-control(type='text' placeholder='0-5' aria-describedby='basic-addon1')
+							.input-group.mb-2
+								.input-group-prepend
+									span#basic-addon1.input-group-text R
+								input.form-control(type='text' placeholder='0-5' aria-describedby='basic-addon1')
+								
 			pre#eventSpan.
 
+			

@@ -1,6 +1,25 @@
+
 #musicNetwork {
 	width: auto;
 	height: 500px;
 	border: 1px solid lightgray;
 }
 
+.toolbox_main {
+	width: 100%;
+	margin: 0;
+}
+#toolbox {
+	margin: 0;
+}
+.toolboxText {
+	padding: 15px;
+}
+#title {
+	margin: 0 auto;
+	text-align: center;
+}
+
+#eventSpan {
+	display: none;
+}

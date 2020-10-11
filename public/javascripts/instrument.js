@@ -1,4 +1,5 @@
-function Instrument(wave_name, attack, decay, sustain, release, gain, filter, reverb, delay) {
+function Instrument(name, wave_name, attack, decay, sustain, release, gain, filter, reverb, delay) {
+    this.name = name;
     let synth = new Tone.PolySynth();
     synth.set({oscillator: {type: wave_name}, envelope: {attack: attack, decay: decay, decayCurve: "linear", sustain: sustain, release: release, releaseCurve: "linear"}})
     this.synth = synth;
@@ -41,6 +42,9 @@ function Instrument(wave_name, attack, decay, sustain, release, gain, filter, re
         }
     };
     this.rebuild();
+    this.set_name = function(name) {
+        this.name = name;
+    };
     this.set_wave_form = function(wave_form) {
         this.synth.set({oscillator: {type: wave_form}});
     };
@@ -77,7 +81,10 @@ function Instrument(wave_name, attack, decay, sustain, release, gain, filter, re
     this.set_delay_feedback = function(feedback) {
         this.delay.set({feedback: feedback});
     };
-
+    
+    this.get_name = function() {
+        return this.name;
+    };
     this.get_wave_form = function() {
         return this.synth.get().oscillator.type;
     };

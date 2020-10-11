@@ -1,81 +1,209 @@
-//const { token } = require("morgan");
-
 // Set-up
-let current_note = ['C',''];
 let root_node;
 let current_node;
 let edgeMode = false;
 
-var locales = {
-    music: {
-        edit: 'Edit',
-        del: 'Delete selected note',
-        back: 'Back',
-        addNode: 'Add Node',
-        addEdge: 'Add Edge',
-        editNode: 'Edit Node',
-        editEdge: 'Edit Edge',
-        addDescription: 'Click in an empty space to place a new node.',
-        edgeDescription: 'Click on a node and drag the edge to another node to connect them.',
-        editEdgeDescription: 'Click on the control points and drag them to a node to connect to it.',
-        createEdgeError: 'Cannot link edges to a cluster.',
-        deleteClusterError: 'Clusters cannot be deleted.',
-        editClusterError: 'Clusters cannot be edited.'
-    }
+var bpm = 120;
+var secPerBeat = 4*60/bpm;
+var default_instrument = new Instrument("default", "sawtooth", 0.01, 0.05, 0.001, 1, 0.9, new Filter(1000, "lowpass"), new Reverb(1, 0.3), null);
+var gamer_instrument = new Instrument("default", "square", 0.01, 0.05, 0.001, 1, 0.2, null, null, null);
+var chill_instrument = new Instrument("default", "sine", 0.5, 0.1, 0.001, 3, 1, null, new Reverb(3, 1), null);
+var listOfInstruments = {"Default": default_instrument, "Gamer": gamer_instrument, "Chill": chill_instrument };
+
+// Log Slider lmao
+function convertLog(position) {
+    console.log(Math.exp(Math.log(5)*position));
+    return Math.exp(Math.log(5)*position);
 }
 
-var default_instrument = new Instrument("sawtooth", 0.01, 0.05, 0.001, 1, 1, new Filter(1000, "lowpass"), new Reverb(1, 0.3), new Delay(0.1, 0.5, 0.5));
+$("#slider").roundSlider();
 
 // create an array with nodes
-// mode can be "Full Random" = randomly chooses
+// mode can be "Complete" = randomly chooses, "Single" = chooses a single node, "None" 
 var nodes = new vis.DataSet([
-    {id: 0, label: 'Bb4', interval: 500, timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Full Random"},
-    {id: 1, label: 'D4', interval: 500, timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Full Random"},
-    {id: 2, label: 'F4', interval: 500, timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Full Random"},
-    {id: 3, label: 'A4', interval: 500, timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Full Random"},
-    {id: 4, label: 'G4', interval: 500, timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Full Random"}
+    {id: 0, label: 'Bb4', interval: [1, 8], timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Single"},
+    {id: 1, label: 'D4', interval: [1, 8], timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Single"},
+    {id: 2, label: 'F4', interval: [1, 8], timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Single"},
+    {id: 3, label: 'A4', interval: [1, 8], timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Single"},
+    {id: 4, label: 'G4', interval: [1, 8], timer: setTimeout(() => {}, 0), instrument: default_instrument, mode: "Single"}
 ]);
 
 // create an array with edges
 var edges = new vis.DataSet([
-    {from: 0, to: 2, interval: 1000},
-    {from: 0, to: 1, interval: 1000},
-    {from: 1, to: 3, interval: 1000},
-    {from: 1, to: 4, interval: 1000},
-    {from: 2, to: 4, interval: 1000},
-    {from: 2, to: 3, interval: 1000}
+    {id: 0, from: 0, to: 2, interval: [1, 8]},
+    {id: 1, from: 0, to: 1, interval: [2, 8]},
+    {id: 2, from: 1, to: 0, interval: [1, 8]},
+    {id: 3, from: 1, to: 3, interval: [1, 8]},
+    {id: 4, from: 1, to: 4, interval: [2, 8]},
+    {id: 5, from: 3, to: 4, interval: [1, 8]},
+    {id: 6, from: 2, to: 3, interval: [1, 8]},
+    {id: 7, from: 4, to: 0, interval: [2, 8]},
 ]);
 
-// node functions set-up 
-function selectNote(note) {
-    switch (note) {
-        case 'sharp':
-            current_note[1] = "#";
-            console.log(current_note);
-            break;
-        case 'flat':
-            current_note[1] = "b";
-            console.log(current_note);
-            break;
-        case 'natural':
-            current_note[1] = "";
-            console.log(current_note);
-            break;
-        default:
-            current_note[0] = note;
-            console.log(current_note);
-            break;
+async function triggerNode(node) {
+    clearTimeout(node.timer);
+    node.instrument.press_note(node.label, node.id);
+    let playTime = node.interval[0]/node.interval[1]*secPerBeat * 1000;
+    console.log(playTime);
+    node.timer = setTimeout(() => { node.instrument.release_note(node.label, node.id) }, 1000);
+}
+
+//var prev_time;
+function sleep(ms) {
+    //Debug
+    //time_now = Date.now();
+    //console.log(time_now - prev_time);
+    //prev_time = time_now;
+
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Traversing to play music
+async function playPressed() {
+    await Tone.start();
+    network.disableEditMode();
+    nodeList = nodes.get({fields: ['id', 'label', 'interval', 'timer', 'instrument', 'mode']});
+    edgeList = edges.get({fields:["from", "to"]});
+    var randomRoot = nodeList[Math.floor(Math.random()*nodeList.length)];
+    current_node = randomRoot;
+    
+    playNode(current_node, 0);
+}
+
+async function playNode(parentNode, delay) {
+    await sleep(delay);
+    triggerNode(parentNode);
+    let start = Date.now();
+    nodeEdges = getNextNodes(parentNode);
+    for (i = 0; i < nodeEdges[0].length; i++) {
+        let edge = edges.get(nodeEdges[1][i]);
+        let interval = edge.interval[0] / edge.interval[1] * secPerBeat * 1000;
+        playNode(nodeEdges[0][i], interval - (Date.now() - start), nodeList);
     }
 }
-function addNodeSubmit() {
+
+function getNextNodes(node) {
+    let neighboring_nodes = network.getConnectedNodes(node.id, 'to');
+    let parent_edges = network.getConnectedEdges(node.id);
+    // Add play sound function here
+    if (node.mode == "Complete") {
+        nodes = [];
+        edges = [];
+        for (node in neighboring_nodes) {
+            if (Math.random > 0.5) {
+                nodes.push(node);
+                loop: for (child_edge in network.getConnectedEdges(node)) {
+                    for (parent_edge in parent_edges) {
+                        if (child_edge == parent_edge) {
+                            edges.push(parent_edge);
+                            break loop;
+                        }
+                    }
+                }
+            }
+        }
+        return [nodes, edges];
+    }
+    if (node.mode == "Single") {
+        let nodeId = neighboring_nodes[Math.floor(Math.random()*neighboring_nodes.length)];
+        let edges;
+        let child_edges = network.getConnectedEdges(nodeId);
+        loop: for (i in child_edges) {
+            for (j in parent_edges) {
+                if (child_edges[i] == parent_edges[j]) {
+                    edges = parent_edges[j];
+                    break loop;
+                }
+            }
+        }
+        return [[nodes.get(nodeId)], [edges]];
+    }
+    loop: for (child_edge in getConnectedEdges(node)) {
+        for (parent_edge in parent_edges) {
+            if (child_edge == parent_edge) {
+                edges.push(parent_edge);
+                break loop;
+            }
+        }
+    }
+    edges = [];
+    for (node in neighboring_nodes) {
+        loop: for (child_edge in getConnectedEdges(node)) {
+            for (parent_edge in parent_edges) {
+                if (child_edge == parent_edge) {
+                    edges.push(parent_edge);
+                    break loop;
+                }
+            }
+        }
+    }
+    return [neighboring_nodes, edges];
+}
+
+//Ariq Code
+var currently_selected_nodes = [];
+var force_save = false;
+function saveNodeSubmit()
+{
+    var note;
+    var accidental;
+    var octave;
+    var instrument_str;
+    
+    $('#noteButtons .active').each(function(){
+        note = $(this)[0].innerText;
+    }); 
+    $('#accidentalButtons .active').each(function(){
+        accidental = $(this)[0].innerText;
+    });
+    $('#octaveButtons .active').each(function(){
+        octave = $(this)[0].innerText;
+    });
+    $('#instrumentButtons .active').each(function(){
+        instrument_str = $(this)[0].innerText;
+    });
+    $('#modeButtons .active').each(function(){
+        mode_str = $(this)[0].innerText;
+    });
+
+    //Debug
+    //console.log(note, accidental, octave, instrument_str);
+    
+    //Add node
+    var accidentals = {'Flat':'b', 'Sharp':'#', 'Natural':''}
+    
     network.enableEditMode();
-    if (current_note[0] != '') {
+    
+    //console.log("LENGTH OF NODES:", currently_selected_nodes.length);
+
+    //If new node
+    if(currently_selected_nodes.length == 0 || force_save)
+    {
         nodeList = nodes.get({fields: ['id', 'label']});
         nodes.add([
-            {id: nodeList.length+1, label: current_note[0] + current_note[1]}
+            {id: nodeList.length+1, label: note + accidentals[accidental] + octave, instrument: listOfInstruments[instrument_str], mode: mode_str}
         ]);
+        
+        force_save = false;
+        
+        return;
     }
+    
+    //Edit pre-existing node
+    var selected_node_id = currently_selected_nodes[0];
+    
+    nodes.update({id: selected_node_id, label: note + accidentals[accidental] + octave, instrument: listOfInstruments[instrument_str], mode: mode_str});
 }
+
+//Ariq Code
+function editOpenModal() {
+    if(currently_selected_nodes.length == 0)
+        return;
+    
+    //Show modal
+    $("#noteModal").modal("toggle");
+}
+
 function toggleAddNode(bool) {
     if (bool) {
         network.enableEditMode();
@@ -105,39 +233,6 @@ function renderNodesDropdown() {
         dropdown.classList.add("dropdown-item"); 
         document.getElementById("fromDropdown").appendChild(dropdown);
     }
-}
-
-function triggerNode(node) {
-    clearTimeout(node.timer);
-    node.instrument.press_note(node.label, node.id);
-    node.timer = setTimeout(() => { node.instrument.release_note(node.label, node.id) }, node.interval);
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Traversing to play music
-async function playPressed() {
-    await Tone.start();
-    network.disableEditMode();
-    nodeList = nodes.get({fields: ['id', 'label', 'interval', 'timer', 'instrument']});
-    edgeList = edges.get({fields:["from", "to"]});
-    var randomRoot = nodeList[Math.floor(Math.random()*nodeList.length)];
-    current_node = randomRoot.id;
-    console.log(randomRoot);
-    while (true) {
-        current_node = getNextNode(current_node);
-        console.log(nodeList[current_node]);
-        triggerNode(nodeList[current_node]);
-        await sleep(200);
-    }
-}
-
-function getNextNode(node_id) {
-    let neighboring_nodes = network.getConnectedNodes(node_id);
-    // Add play sound function here
-    return neighboring_nodes[Math.floor(Math.random()*neighboring_nodes.length)];
 }
 
 // create a network
@@ -195,9 +290,9 @@ var options = {
             //Styling here dab
         }
     },
-    locales: locales,
-    locale: "music",
 };
+
+//
 
 // initialize your network!
 var network = new vis.Network(container, data, options);
@@ -265,6 +360,8 @@ network.on("hidePopup", function () {
 });
 network.on("select", function (params) {
     console.log("select Event:", params);
+
+    currently_selected_nodes = params["nodes"];
 });
 network.on("selectNode", function (params) {
     // THIS IS WHEN YOU SELECT A NODE
