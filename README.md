@@ -1,2 +1,2 @@
 # MusicGraph
-Website: http://musicgraph.tech/
+Demo Website: http://musicgraph.tech/
