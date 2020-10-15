@@ -3,7 +3,7 @@ Demo Website: http://musicgraph.tech/
 
 DevPost: https://devpost.com/software/music-graph-dpm1cy
 
-In the project directory, you can run:
+# In the project directory, you can run:
 
 ### `npm install`
 ### `npm run dev`
